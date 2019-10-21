@@ -3,13 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>eladmin</artifactId>
-        <groupId>me.zhengjie</groupId>
-        <version>2.2</version>
+        <artifactId>qxwechat-small-act-admin</artifactId>
+        <groupId>qxwechat.small.act.admin</groupId>
+        <version>1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>eladmin-tools</artifactId>
+    <artifactId>act-admin-tools</artifactId>
     <name>工具模块</name>
 
     <properties>
@@ -21,9 +21,9 @@
     <dependencies>
         <!-- 同时需要common模块和logging模块只需要引入logging模块即可 -->
         <dependency>
-            <groupId>me.zhengjie</groupId>
-            <artifactId>eladmin-logging</artifactId>
-            <version>2.2</version>
+            <groupId>qxwechat.small.act.admin</groupId>
+            <artifactId>act-admin-logging</artifactId>
+            <version>1.0</version>
         </dependency>
 
         <!--邮件依赖-->

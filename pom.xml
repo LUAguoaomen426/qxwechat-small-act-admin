@@ -4,26 +4,23 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>me.zhengjie</groupId>
-    <artifactId>eladmin</artifactId>
+    <groupId>qxwechat.small.act.admin</groupId>
+    <artifactId>qxwechat-small-act-admin</artifactId>
     <packaging>pom</packaging>
-    <version>2.2</version>
+    <version>1.0</version>
 
     <modules>
-        <module>eladmin-common</module>
-        <module>eladmin-logging</module>
-        <module>eladmin-system</module>
-        <module>eladmin-tools</module>
-        <module>eladmin-generator</module>
+        <module>act-admin-common</module>
+        <module>act-admin-logging</module>
+        <module>act-admin-system</module>
+        <module>act-admin-tools</module>
+        <module>act-admin-generator</module>
     </modules>
-
-    <name>EL-ADMIN后台管理系统</name>
-    <url>http://auauz.net</url>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.0.RELEASE</version>
+        <version>2.2.0.RELEASE</version>
         <relativePath/>
     </parent>
 
