@@ -15,6 +15,7 @@
         <module>act-admin-system</module>
         <module>act-admin-tools</module>
         <module>act-admin-generator</module>
+        <module>act-admin-data-read</module>
     </modules>
 
     <parent>
@@ -48,6 +49,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -87,6 +94,12 @@
             <artifactId>log4jdbc-log4j2-jdbc4.1</artifactId>
             <version>${log4jdbc.version}</version>
         </dependency>
+        <!--日志管理-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+
 
         <!-- RESTful APIs swagger2 -->
         <dependency>

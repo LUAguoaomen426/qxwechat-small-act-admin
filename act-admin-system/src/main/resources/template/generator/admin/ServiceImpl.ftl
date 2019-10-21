@@ -5,12 +5,12 @@ import ${package}.domain.${className};
     <#list columns as column>
         <#if column.columnKey = 'UNI'>
             <#if column_index = 1>
-import me.zhengjie.exception.EntityExistException;
+import EntityExistException;
             </#if>
         </#if>
     </#list>
 </#if>
-import me.zhengjie.utils.ValidationUtil;
+import ValidationUtil;
 import ${package}.repository.${className}Repository;
 import ${package}.service.${className}Service;
 import ${package}.service.dto.${className}DTO;
@@ -30,8 +30,8 @@ import cn.hutool.core.util.IdUtil;
 </#if>
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import me.zhengjie.utils.PageUtil;
-import me.zhengjie.utils.QueryHelp;
+import PageUtil;
+import QueryHelp;
 import java.util.List;
 import java.util.Map;
 

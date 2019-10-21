@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration status="INFO">
+    <Properties>
+        <Property name="path">/logs/qxwechat-small-act-admin</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console">
+            <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss} [%p]-[%t]-%c{1.} %m%n}"/>
+            <!--过滤器设置输出的级别-->
+            <!--过滤器设置输出的级别-->
+            <Filters>
+                <!--只接受INFO级别的日志，其余的全部拒绝处理-->
+                <ThresholdFilter level="trace"/>
+                <ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+        </Console>
+        <!--info-log-->
+        <RollingFile name="InfoLog" fileName="${path}/info.log" filePattern="${path}/info.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%p]-[%t]-[%X{PtxId}]-[%l] %m%n"/>
+            <!--过滤器设置输出的级别-->
+            <Filters>
+                <!--只接受INFO级别的日志，其余的全部拒绝处理-->
+                <ThresholdFilter level="info"/>
+                <ThresholdFilter level="warn" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <!--warn-log-->
+        <RollingFile name="WarnLog" fileName="${path}/warn.log" filePattern="${path}/warn.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%p]-[%t]-[%X{PtxId}]-[%l] %m%n"/>
+            <!--过滤器设置输出的级别-->
+            <Filters>
+                <ThresholdFilter level="warn"/>
+                <ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <!--error-log-->
+        <RollingFile name="ErrorLog" fileName="${path}/error.log" filePattern="${path}/error.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%p]-[%t]-[%X{PtxId}]-[%l] %m%n"/>
+            <!--过滤器设置输出的级别-->
+            <ThresholdFilter level="error"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <!-- root部分定义了log4j2的默认输出级别和方式 -->
+    <loggers>
+        <!-- 打印hibernate的info日志 -->
+        <!--        <Logger name="org.hibernate" level="info" additivity="false">-->
+        <!--            <AppenderRef ref="Console"/>-->
+        <!--        </Logger>-->
+
+        <!-- 打印sql语句 -->
+        <Logger name="org.hibernate.SQL" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- 打印sql语句的参数绑定 -->
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="trace" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <root level="info">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="InfoLog"/>
+            <appender-ref ref="WarnLog"/>
+            <appender-ref ref="ErrorLog"/>
+        </root>
+    </loggers>
+
+</configuration>
