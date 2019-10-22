@@ -3,6 +3,7 @@ package com.red.star.macalline.act.admin.domain;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -13,9 +14,9 @@ import java.sql.Timestamp;
  */
 @Entity
 @Data
-@Table(name = "log")
+@Table(name = "tb_act_admin_log")
 @NoArgsConstructor
-public class Log  implements Serializable {
+public class Log implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

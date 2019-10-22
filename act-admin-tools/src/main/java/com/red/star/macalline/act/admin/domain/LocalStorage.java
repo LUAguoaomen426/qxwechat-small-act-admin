@@ -18,7 +18,7 @@ import java.io.Serializable;
 */
 @Entity
 @Data
-@Table(name="local_storage")
+@Table(name="tb_act_admin_local_storage")
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocalStorage implements Serializable {

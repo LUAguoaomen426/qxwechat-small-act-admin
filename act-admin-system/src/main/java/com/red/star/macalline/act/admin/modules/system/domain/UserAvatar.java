@@ -11,7 +11,7 @@ import javax.persistence.*;
  * @date 2019年9月7日 16:16:59
  */
 @Entity
-@Table(name = "user_avatar")
+@Table(name = "tb_act_admin_user_avatar")
 @Data
 @NoArgsConstructor
 public class UserAvatar {
@@ -27,7 +27,7 @@ public class UserAvatar {
 
     private String size;
 
-    public UserAvatar(UserAvatar userAvatar,String realName, String path, String size) {
+    public UserAvatar(UserAvatar userAvatar, String realName, String path, String size) {
         this.id = ObjectUtil.isNotEmpty(userAvatar) ? userAvatar.getId() : null;
         this.realName = realName;
         this.path = path;

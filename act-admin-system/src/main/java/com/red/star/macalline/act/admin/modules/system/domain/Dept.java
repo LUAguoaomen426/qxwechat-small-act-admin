@@ -16,7 +16,7 @@ import java.util.Set;
 */
 @Entity
 @Data
-@Table(name="dept")
+@Table(name="tb_act_admin_dept")
 public class Dept implements Serializable {
 
     /**

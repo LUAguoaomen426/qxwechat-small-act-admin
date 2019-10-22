@@ -13,7 +13,7 @@ import java.util.List;
 */
 @Entity
 @Data
-@Table(name="dict")
+@Table(name="tb_act_admin_dict")
 public class Dict implements Serializable {
 
     @Id

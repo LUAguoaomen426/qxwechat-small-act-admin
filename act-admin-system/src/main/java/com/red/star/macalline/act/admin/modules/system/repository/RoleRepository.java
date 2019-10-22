@@ -24,10 +24,10 @@ public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificat
     Set<Role> findByUsers_Id(Long id);
 
     @Modifying
-    @Query(value = "delete from roles_permissions where permission_id = ?1",nativeQuery = true)
+    @Query(value = "delete from tb_act_admin_roles_permissions where permission_id = ?1",nativeQuery = true)
     void untiedPermission(Long id);
 
     @Modifying
-    @Query(value = "delete from roles_menus where menu_id = ?1",nativeQuery = true)
+    @Query(value = "delete from tb_act_admin_roles_menus where menu_id = ?1",nativeQuery = true)
     void untiedMenu(Long id);
 }

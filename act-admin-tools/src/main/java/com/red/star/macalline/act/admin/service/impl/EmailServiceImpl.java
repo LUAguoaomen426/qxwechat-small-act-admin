@@ -72,6 +72,7 @@ public class EmailServiceImpl implements EmailService {
         account.setFrom(emailConfig.getUser() + "<" + emailConfig.getFromUser() + ">");
         //ssl方式发送
         account.setSslEnable(true);
+        account.setUser(emailConfig.getUser());
         String content = emailVo.getContent();
         /**
          * 发送
@@ -82,7 +83,7 @@ public class EmailServiceImpl implements EmailService {
                     .setTitle(emailVo.getSubject())
                     .setContent(content)
                     .setHtml(true)
-                    //关闭session
+            //关闭session
                     .setUseGlobalSession(false)
                     .send();
         } catch (Exception e) {

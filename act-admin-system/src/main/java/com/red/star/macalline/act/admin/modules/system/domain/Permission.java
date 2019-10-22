@@ -18,7 +18,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Table(name = "permission")
+@Table(name = "tb_act_admin_permission")
 public class Permission implements Serializable{
 
 	@Id

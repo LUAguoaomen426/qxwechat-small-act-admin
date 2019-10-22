@@ -11,7 +11,6 @@ import com.red.star.macalline.act.admin.modules.system.service.RoleService;
 import com.red.star.macalline.act.admin.modules.system.service.UserService;
 import com.red.star.macalline.act.admin.modules.system.service.dto.RoleSmallDTO;
 import com.red.star.macalline.act.admin.modules.system.service.dto.UserQueryCriteria;
-import com.red.star.macalline.act.admin.service.PictureService;
 import com.red.star.macalline.act.admin.service.VerificationCodeService;
 import com.red.star.macalline.act.admin.utils.ElAdminConstant;
 import com.red.star.macalline.act.admin.utils.EncryptUtils;
@@ -46,9 +45,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private PictureService pictureService;
 
     @Autowired
     private DataScope dataScope;

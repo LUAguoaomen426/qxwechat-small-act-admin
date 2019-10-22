@@ -19,7 +19,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Table(name = "menu")
+@Table(name = "tb_act_admin_menu")
 public class Menu implements Serializable {
 
     @Id
