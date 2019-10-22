@@ -35,6 +35,12 @@
             <version>1.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>qxwechat.small.act.admin</groupId>
+            <artifactId>act-admin-feature</artifactId>
+            <version>1.0</version>
+        </dependency>
+
         <!--jwt-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

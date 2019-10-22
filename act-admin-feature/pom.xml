@@ -9,7 +9,15 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>act-admin-data-read</artifactId>
+    <artifactId>act-admin-feature</artifactId>
+    <dependencies>
+        <!-- 同时需要common模块和logging模块只需要引入logging模块即可 -->
+        <dependency>
+            <groupId>qxwechat.small.act.admin</groupId>
+            <artifactId>act-admin-logging</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
 
 
 </project>

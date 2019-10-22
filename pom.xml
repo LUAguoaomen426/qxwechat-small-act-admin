@@ -15,7 +15,7 @@
         <module>act-admin-system</module>
         <module>act-admin-tools</module>
         <module>act-admin-generator</module>
-        <module>act-admin-data-read</module>
+        <module>act-admin-feature</module>
     </modules>
 
     <parent>
