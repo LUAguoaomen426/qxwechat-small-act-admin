@@ -1,6 +1,6 @@
-#配置数据源（主-写）
 spring:
   datasource:
+    #配置jpa数据源（主-写）
     primary:
       type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: com.mysql.cj.jdbc.Driver
@@ -31,7 +31,7 @@ spring:
       web-stat-filter:
         url-pattern: /*
         exclusions: "*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*"
-    #配置数据源（从-读）
+    #配置jpa数据源（从-读）
     read:
       type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: com.mysql.cj.jdbc.Driver
@@ -63,6 +63,20 @@ spring:
       web-stat-filter:
         url-pattern: /*
         exclusions: "*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*"
+    #配置mybatis数据源（主-从）
+    dynamic:
+      primary: master #设置默认的数据源或者数据源组,默认值即为master
+      datasource:
+        master:
+          username: macalline_db
+          password: macalline_db@5621df08A9df9E0
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://47.111.155.104:3306/macalline_dev?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+        slave:
+          username: macalline_db
+          password: macalline_db@5621df08A9df9E0
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://47.111.155.104:3306/macalline_dev?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
 
   #配置 Jpa
   jpa:

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.red.star.macalline.act.admin.mapper.MallMybatisMapper">
+
+    <update id="updateWapMall">
+        <foreach collection="mallList" item="list" separator=";">
+            update tb_wap_mall
+            set self_flag = #{list.selfFlag} ,
+            <if test="list.entranceEnable != null">
+                entrance_enable = #{list.entranceEnable},
+            </if>
+            <if test="list.detailAddress != null">
+                detail_address = #{list.detailAddress} ,
+            </if>
+            mall_name = #{list.mallName},
+            province = #{list.province},
+            <if test="list.isMl != null">
+                is_ml=#{list.isMl},
+            </if>
+            city = #{list.city}
+            where oms_code=#{list.omsCode}
+        </foreach>
+    </update>
+
+</mapper>

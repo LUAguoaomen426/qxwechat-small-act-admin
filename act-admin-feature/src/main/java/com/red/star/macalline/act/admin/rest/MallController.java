@@ -14,6 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author AMGuo
  * @date 2019-10-22
@@ -46,8 +48,8 @@ public class MallController {
     @ApiOperation(value = "修改TbWapMall")
     @PutMapping(value = "/mall")
     @PreAuthorize("hasAnyRole('ADMIN','TBWAPMALL_ALL','TBWAPMALL_EDIT')")
-    public ResponseEntity update(@Validated @RequestBody Mall resources) {
-        mallService.update(resources);
+    public ResponseEntity update(@Validated @RequestBody List<Mall> malls) {
+        mallService.update(malls);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
@@ -59,4 +61,5 @@ public class MallController {
         mallService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
     }
+
 }

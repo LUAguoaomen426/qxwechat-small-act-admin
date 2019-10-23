@@ -1,6 +1,7 @@
 package com.red.star.macalline.act.admin;
 
 import com.red.star.macalline.act.admin.utils.SpringContextHolder;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAsync
 @SpringBootApplication
 @EnableTransactionManagement
+@MapperScan("com.red.star.macalline.act.admin.mapper")
 public class AppRun {
 
     public static void main(String[] args) {

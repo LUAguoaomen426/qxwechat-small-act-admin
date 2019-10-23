@@ -3,6 +3,8 @@ package com.red.star.macalline.act.admin.repository;
 import com.red.star.macalline.act.admin.domain.Mall;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  * @author AMGuo
@@ -25,4 +27,5 @@ public interface MallRepository extends JpaRepository<Mall, Integer>, JpaSpecifi
      * @return
      */
     Mall findByMallCode(String mall_code);
+
 }

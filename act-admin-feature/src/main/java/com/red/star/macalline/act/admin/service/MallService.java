@@ -12,7 +12,6 @@ import java.util.Map;
  * @author AMGuo
  * @date 2019-10-22
  */
-//@CacheConfig(cacheNames = "tbWapMall")
 public interface MallService {
 
     /**
@@ -22,7 +21,6 @@ public interface MallService {
      * @param pageable
      * @return
      */
-    //@Cacheable
     Map<String, Object> queryAll(MallQueryCriteria criteria, Pageable pageable);
 
     /**
@@ -31,7 +29,6 @@ public interface MallService {
      * @param criteria
      * @return
      */
-    //@Cacheable
     List<MallDTO> queryAll(MallQueryCriteria criteria);
 
     /**
@@ -40,7 +37,6 @@ public interface MallService {
      * @param id
      * @return
      */
-    //@Cacheable(key = "#p0")
     MallDTO findById(Integer id);
 
     /**
@@ -49,7 +45,6 @@ public interface MallService {
      * @param resources
      * @return
      */
-    //@CacheEvict(allEntries = true)
     MallDTO create(Mall resources);
 
     /**
@@ -57,14 +52,13 @@ public interface MallService {
      *
      * @param resources
      */
-    //@CacheEvict(allEntries = true)
-    void update(Mall resources);
+    void update(List<Mall> resources);
 
     /**
      * 删除
      *
      * @param id
      */
-    //@CacheEvict(allEntries = true)
     void delete(Integer id);
+
 }

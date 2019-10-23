@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * @ProjectName: qxwechat-small-act-admin
  * @Package: com.red.star.macalline.act.admin.config
- * @Description: 数据源配置：根据事务readonly属性动态切换读写数据源
+ * @Description: 数据源配置：
  * @Author: AMGuo
  * @CreateDate: 2019-10-21 14:56
  * @Version: 1.0
@@ -32,6 +32,21 @@ public class DataSourceConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceConfig.class);
 
+    /**
+     * mybatis读写分离
+     *
+     * @return
+     */
+    @Bean
+    public MasterSlaveAutoRoutingPlugin masterSlaveAutoRoutingPlugin() {
+        return new MasterSlaveAutoRoutingPlugin();
+    }
+
+    /**
+     * jpa读写分离（根据事务readonly属性动态切换读写数据源）
+     *
+     * @return
+     */
     @Bean(name = "primaryDataSource")
     @Primary
     @ConfigurationProperties(prefix = "spring.datasource.primary")
@@ -55,7 +70,7 @@ public class DataSourceConfig {
             @Override
             protected Object determineCurrentLookupKey() {
                 String lookupKey = TransactionSynchronizationManager.isCurrentTransactionReadOnly() ? "slave" : "master";
-                LOGGER.trace("connected DataSource :{}", lookupKey);
+                LOGGER.trace("[jpa]connected DataSource :{}", lookupKey);
                 return lookupKey;
             }
         };

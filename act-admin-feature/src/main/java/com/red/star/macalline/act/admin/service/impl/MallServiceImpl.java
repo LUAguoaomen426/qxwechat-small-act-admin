@@ -1,7 +1,11 @@
 package com.red.star.macalline.act.admin.service.impl;
 
+import com.red.star.macalline.act.admin.constant.CacheConstant;
+import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.exception.EntityExistException;
+import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
+import com.red.star.macalline.act.admin.mapper.MallMybatisMapper;
 import com.red.star.macalline.act.admin.repository.MallRepository;
 import com.red.star.macalline.act.admin.service.MallService;
 import com.red.star.macalline.act.admin.service.dto.MallDTO;
@@ -13,10 +17,13 @@ import com.red.star.macalline.act.admin.utils.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,8 +39,17 @@ public class MallServiceImpl implements MallService {
     @Autowired
     private MallRepository mallRepository;
 
-    @Autowired
+    @Resource
     private MallMapper mallMapper;
+
+    @Resource
+    private MallMybatisMapper mallMybatisMapper;
+
+    @Resource
+    private RedisTemplate redisTemplate;
+
+    @Resource
+    private ActModuleMybatisMapper actModuleMybatisMapper;
 
     @Override
     public Map<String, Object> queryAll(MallQueryCriteria criteria, Pageable pageable) {
@@ -67,21 +83,21 @@ public class MallServiceImpl implements MallService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void update(Mall resources) {
-        Optional<Mall> optionalTbWapMall = mallRepository.findById(resources.getId());
-        ValidationUtil.isNull(optionalTbWapMall, "Mall", "id", resources.getId());
-        Mall tbWapMall = optionalTbWapMall.get();
-        Mall tbWapMall1 = null;
-        tbWapMall1 = mallRepository.findByOmsCode(resources.getOmsCode());
-        if (tbWapMall1 != null && !tbWapMall1.getId().equals(tbWapMall.getId())) {
-            throw new EntityExistException(Mall.class, "oms_code", resources.getOmsCode());
+    public void update(List<Mall> resources) {
+        if (ObjectUtils.isEmpty(resources)) {
+            return;
         }
-        tbWapMall1 = mallRepository.findByMallCode(resources.getMallCode());
-        if (tbWapMall1 != null && !tbWapMall1.getId().equals(tbWapMall.getId())) {
-            throw new EntityExistException(Mall.class, "mall_code", resources.getMallCode());
+        mallMybatisMapper.updateWapMall(resources);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ENTRANCE);
+        for (Mall mall : resources) {
+            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_CODE + mall.getMallCode());
+            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_OMS_CODE + mall.getOmsCode());
         }
-        tbWapMall.copy(resources);
-        mallRepository.save(tbWapMall);
+        //清除大促缓存
+        for (ActModule actModule :
+                actModuleMybatisMapper.listEnableAct()) {
+            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME + actModule.getActCode());
+        }
     }
 
     @Override
@@ -89,4 +105,5 @@ public class MallServiceImpl implements MallService {
     public void delete(Integer id) {
         mallRepository.deleteById(id);
     }
+
 }

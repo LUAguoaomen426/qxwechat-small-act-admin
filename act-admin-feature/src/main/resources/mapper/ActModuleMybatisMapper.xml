@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper">
+
+    <select id="listEnableAct" resultType="com.red.star.macalline.act.admin.domain.ActModule">
+        SELECT act_code,
+               module_name,
+               second_module_name,
+               module_type,
+               show_image,
+               link_url,
+               end_time,
+               sub_type,
+               TRIM(BOTH '"' FROM JSON_EXTRACT(am.program_config, '$.appId'))     AS appId,
+               TRIM(BOTH '"' FROM JSON_EXTRACT(am.program_config, '$.extraData')) AS extraData
+        FROM tb_wap_act_module am
+        WHERE is_delete = 0
+        ORDER BY order_level ASC
+    </select>
+
+</mapper>

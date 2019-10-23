@@ -2,7 +2,10 @@ package com.red.star.macalline.act.admin.domain;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -14,57 +17,93 @@ import java.io.Serializable;
 @Entity
 @Data
 @Table(name = "tb_wap_mall")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Mall implements Serializable {
 
-    // 自增主键
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(value = "id", example = "0")
     private Integer id;
 
-    // 商场编码
-    @Column(name = "oms_code", unique = true, nullable = false)
+    /**
+     * OMS商场编码
+     */
+    @ApiModelProperty(value = "OMS商场编码")
+    @Column(name = "oms_code")
     private String omsCode;
 
-    // 商场编码
-    @Column(name = "mall_code", unique = true, nullable = false)
+    /**
+     * 商场编码
+     */
+    @ApiModelProperty(value = "商场编码")
+    @Column(name = "mall_code")
     private String mallCode;
 
-    // 商场名称
+    /**
+     * 商场名称
+     */
+    @ApiModelProperty(value = "商场名称")
     @Column(name = "mall_name")
     private String mallName;
 
-    // 省份
-    @Column(name = "province")
+    /**
+     * 商场所在省
+     */
+    @ApiModelProperty(value = "商场所在省")
     private String province;
 
-    // 城市
-    @Column(name = "city")
+    /**
+     * 商场所在城市
+     */
+    @ApiModelProperty(value = "商场所在城市")
     private String city;
-
-    // 自营商场标识
-    @Column(name = "self_flag")
-    private Integer selfFlag;
-
-    // 活动列表商场启用状态
-    @Column(name = "entrance_enable", nullable = false)
-    private Integer entranceEnable;
-
-    // 是否为城市默认商场
-    @Column(name = "default_enable", nullable = false)
-    private Integer defaultEnable;
-
-    // 是否参与活动的默认值 0不参与 1 参与
-    @Column(name = "defult_join")
-    private Integer defultJoin;
-
-    // 详细地址
+    /**
+     * 商场详细地址
+     */
+    @ApiModelProperty(value = "商场详细地址")
     @Column(name = "detail_address")
     private String detailAddress;
+    /**
+     * 是否自营
+     */
+    @ApiModelProperty(value = "是否自营商场")
+    @Column(name = "self_flag")
+    private Boolean selfFlag;
+    /**
+     * 是否为城市默认商场
+     */
+    @ApiModelProperty(value = "是否为城市默认商场")
+    @Column(name = "default_enable")
+    private Boolean defaultEnable;
 
-    // 是否为瞄零商场 0不是 1是
+    /**
+     * 活动列表可见
+     */
+    @Column(name = "entrance_enable")
+    private Boolean entranceEnable;
+    /**
+     * 默认参与大促活动标识
+     */
+    @Column(name = "defult_join")
+    private Boolean defultJoin;
+    /**
+     * 是否参与活动
+     */
+    @Transient
+    private Boolean isJoin;
+    /**
+     * 特殊链接是否展示,特殊链接->[商场]时使用
+     */
+    @Transient
+    private Boolean linkShow;
+    /**
+     * 是否瞄零
+     */
+    @ApiModelProperty(value = "是否瞄零")
     @Column(name = "is_ml")
-    private Integer isMl;
+    private Boolean isMl;
 
     public void copy(Mall source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
