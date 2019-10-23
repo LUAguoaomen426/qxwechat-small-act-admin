@@ -22,4 +22,28 @@
         </foreach>
     </update>
 
+    <select id="findAllMallWithKeyOmsCode" resultType="com.red.star.macalline.act.admin.entity.MallMsgBO">
+        SELECT
+        id,
+        oms_code,
+        mall_code,
+        mall_name,
+        province,
+        city,
+        self_flag,
+        detail_address
+        FROM
+        tb_wap_mall
+    </select>
+
+    <insert id="insertActMallMerge">
+        INSERT INTO tb_wap_act_mall_merge
+        ( oms_code, act_code, is_join, create_time, update_time )
+        VALUES
+        <foreach collection="mallList" item="list" separator=",">
+            ( #{list.omsCode},#{actCode},#{list.linkShow},now(),now())
+        </foreach>
+    </insert>
+
+
 </mapper>

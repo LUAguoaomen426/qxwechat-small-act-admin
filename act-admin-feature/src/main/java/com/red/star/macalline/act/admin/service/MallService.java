@@ -1,5 +1,6 @@
 package com.red.star.macalline.act.admin.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.service.dto.MallDTO;
 import com.red.star.macalline.act.admin.service.dto.MallQueryCriteria;
@@ -12,7 +13,7 @@ import java.util.Map;
  * @author AMGuo
  * @date 2019-10-22
  */
-public interface MallService {
+public interface MallService extends IService<Mall> {
 
     /**
      * 查询数据分页
@@ -61,4 +62,5 @@ public interface MallService {
      */
     void delete(Integer id);
 
+    void syncMallInfo();
 }

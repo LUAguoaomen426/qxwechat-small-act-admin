@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.red.star.macalline.act.admin.mapper.ActSpecLinkMybatisMapper">
+
+    <resultMap id="findSepcLinkMap" type="com.red.star.macalline.act.admin.domain.ActSpecLink" autoMapping="true">
+        <id column="id" property="id"></id>
+        <collection property="mallList" javaType="List" ofType="com.red.star.macalline.act.admin.domain.Mall"
+                    autoMapping="true">
+            <id column="oms_code" property="omsCode"></id>
+        </collection>
+    </resultMap>
+    <select id="listFindSpecLinkByActCode" resultMap="findSepcLinkMap">
+        SELECT
+        sl.id,
+        sl.spec_code,
+        sl.`name`,
+        sl.url ,
+        sl.show_image,
+        sl.sort,
+        sl.type,
+        sl.time_limit,
+        wm.oms_code,
+        wm.mall_code,
+        wm.mall_name,
+        wm.province,
+        wm.city,
+        sm.is_show as link_show
+        FROM
+        tb_wap_act_spec_link AS sl,
+        tb_wap_act_mall_spec_merge AS sm ,
+        tb_wap_mall as wm
+        WHERE
+        sl.spec_code = sm.spec_code
+        and sm.oms_code = wm.oms_code
+        and sm.act_code =#{actCode}
+        order by wm.province, wm.city, wm.oms_code
+    </select>
+
+    <insert id="insertSpecLinkMergeByList">
+        INSERT INTO tb_wap_act_mall_spec_merge
+        ( oms_code, act_code, spec_code, is_show, create_time, update_time )
+        VALUES
+        <foreach collection="mallList" item="list" separator=",">
+            ( #{list.omsCode},#{actCode},#{specCode},#{list.linkShow},now(),now())
+        </foreach>
+
+    </insert>
+
+</mapper>

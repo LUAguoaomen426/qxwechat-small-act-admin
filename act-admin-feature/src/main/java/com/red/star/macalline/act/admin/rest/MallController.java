@@ -62,4 +62,18 @@ public class MallController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    /**
+     * 基础商场数据同步
+     * @return
+     */
+    @Log("同步TbWapMall")
+    @ApiOperation(value = "同步TbWapMall")
+    @GetMapping("/mallBaseInfo/async")
+    @PreAuthorize("hasAnyRole('ADMIN','MALL_ALL','MALL_SYNC')")
+    public ResponseEntity SyncMallInfo(){
+        mallService.syncMallInfo();
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+
 }
