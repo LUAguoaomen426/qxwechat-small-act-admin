@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -64,15 +65,30 @@ public class MallController {
 
     /**
      * 基础商场数据同步
+     *
      * @return
      */
     @Log("同步TbWapMall")
     @ApiOperation(value = "同步TbWapMall")
     @GetMapping("/mallBaseInfo/async")
     @PreAuthorize("hasAnyRole('ADMIN','MALL_ALL','MALL_SYNC')")
-    public ResponseEntity SyncMallInfo(){
+    public ResponseEntity SyncMallInfo() {
         mallService.syncMallInfo();
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    /**
+     * 上传excel批量修改某活动下的商场是否参与
+     *
+     * @param actCode
+     * @param file
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/{actCode}/mallInfo/upload")
+    public ResponseEntity uploadMallInfo(@PathVariable("actCode") String actCode, @RequestParam("file") MultipartFile file) {
+        mallService.uploadMallinfo(actCode, file);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
 

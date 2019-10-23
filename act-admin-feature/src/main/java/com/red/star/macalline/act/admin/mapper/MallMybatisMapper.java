@@ -37,4 +37,8 @@ public interface MallMybatisMapper extends BaseMapper<Mall> {
      * @param mallList
      */
     void insertActMallMerge(@Param("actCode") String actCode, @Param("mallList") List<Mall> mallList);
+
+    void updateActMergeIsJoinByActCode(String actCode, boolean b);
+
+    void updateActMallMerge(@Param("actCode") String actCode, @Param("mallList") List<Mall> mallList);
 }

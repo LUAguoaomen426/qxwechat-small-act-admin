@@ -1,5 +1,9 @@
 package com.red.star.macalline.act.admin.service.impl;
 
+import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.ExcelReader;
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -22,6 +26,8 @@ import com.red.star.macalline.act.admin.util.WxInfoUtil;
 import com.red.star.macalline.act.admin.utils.PageUtil;
 import com.red.star.macalline.act.admin.utils.QueryHelp;
 import com.red.star.macalline.act.admin.utils.ValidationUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,8 +36,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -60,6 +69,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
     @Resource
     private ActSpecLinkMybatisMapper actSpecLinkMybatisMapper;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MallServiceImpl.class);
     @Override
     public Map<String, Object> queryAll(MallQueryCriteria criteria, Pageable pageable) {
         Page<Mall> page = mallRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
@@ -200,5 +210,60 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
         }
 
     }
+
+
+    /**
+     * 上传文件批量修改商场信息
+     *
+     * @param file
+     */
+    @Transactional(readOnly = false)
+    public void uploadMallinfo(String actCode, MultipartFile file) {
+        if (ObjectUtils.isEmpty(file)) {
+           // return ActResponse.buildErrorResponse("文件上传错误");
+        }
+        String originalFilename = file.getOriginalFilename();
+        String fileSuffix = originalFilename.split("\\.")[1];
+        if (!"xls".equalsIgnoreCase(fileSuffix) && !"xlsx".equalsIgnoreCase(fileSuffix)) {
+          //  return ActResponse.buildErrorResponse("文件必须为excel");
+        }
+        List<Mall> omsCodes = new ArrayList<>();
+        try {
+            ExcelReader reader = EasyExcelFactory.getReader(new BufferedInputStream(file.getInputStream()), new AnalysisEventListener<List<String>>() {
+
+                @Override
+                public void invoke(List<String> o, AnalysisContext analysisContext) {
+                    Mall mall = new Mall();
+                    mall.setOmsCode(o.get(0));
+                    mall.setIsJoin(true);
+                    omsCodes.add(mall);
+                }
+
+                @Override
+                public void doAfterAllAnalysed(AnalysisContext analysisContext) {
+
+                }
+            });
+            reader.read();
+        } catch (IOException e) {
+            LOGGER.error("excel上传失败 e:{}", e);
+           // return ActResponse.buildErrorResponse("更新失败");
+        }
+        if (omsCodes.size() < 1) {
+           // return ActResponse.buildErrorResponse("读取文件失败");
+        }
+        //批量更新对应活动的omsCode
+        mallMybatisMapper.updateActMergeIsJoinByActCode(actCode, false);
+        mallMybatisMapper.updateActMallMerge(actCode, omsCodes);
+
+        //清除一下缓存
+        redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ACT + actCode);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME+actCode);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_MALL_OMS_CODE);
+
+
+       // return ActResponse.buildSuccessResponse();
+    }
+
 
 }

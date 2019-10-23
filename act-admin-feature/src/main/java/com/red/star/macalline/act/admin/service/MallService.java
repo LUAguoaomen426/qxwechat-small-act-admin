@@ -5,6 +5,7 @@ import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.service.dto.MallDTO;
 import com.red.star.macalline.act.admin.service.dto.MallQueryCriteria;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -63,4 +64,6 @@ public interface MallService extends IService<Mall> {
     void delete(Integer id);
 
     void syncMallInfo();
+
+    void uploadMallinfo(String actCode, MultipartFile file);
 }
