@@ -18,6 +18,12 @@
         ORDER BY order_level ASC
     </select>
 
+    <select id="posterIdConvertToActCode" resultType="string">
+        SELECT act_code
+        FROM tb_wap_act_module
+        where poster_id = #{posterId}
+    </select>
+
     <select id="findMaxLevel" resultType="Integer">
         SELECT max(order_level)
         from tb_wap_act_module

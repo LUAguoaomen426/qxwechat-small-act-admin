@@ -87,6 +87,19 @@ public class ActModuleController {
         ActResponse actResponse = actModuleService.addActInfo(actInfo);
         return actResponse;
     }
+    /**
+     * 活动信息修改
+     *
+     * @param actInfo
+     * @return
+     */
+    @ResponseBody
+    @PostMapping(value = "/actInfo/save")
+    public ActResponse saveActInfo(@RequestBody ActModule actInfo) {
+        ActResponse actResponse = actModuleService.saveActInfo(actInfo);
+        return actResponse;
+    }
+
 
     /**
      * 当前活动优先级改变

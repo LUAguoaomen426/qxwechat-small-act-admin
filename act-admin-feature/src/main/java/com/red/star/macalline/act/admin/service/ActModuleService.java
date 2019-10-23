@@ -5,35 +5,39 @@ import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.dto.ActModuleDTO;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
 import org.springframework.data.domain.Pageable;
-import java.util.Map;
+
 import java.util.List;
+import java.util.Map;
 
 /**
-* @author AMGuo
-* @date 2019-10-22
-*/
+ * @author AMGuo
+ * @date 2019-10-22
+ */
 //@CacheConfig(cacheNames = "tbWapActModule")
 public interface ActModuleService {
 
     /**
-    * 查询数据分页
-    * @param criteria
-    * @param pageable
-    * @return
-    */
+     * 查询数据分页
+     *
+     * @param criteria
+     * @param pageable
+     * @return
+     */
     //@Cacheable
-    Map<String,Object> queryAll(ActModuleQueryCriteria criteria, Pageable pageable);
+    Map<String, Object> queryAll(ActModuleQueryCriteria criteria, Pageable pageable);
 
     /**
-    * 查询所有数据不分页
-    * @param criteria
-    * @return
-    */
+     * 查询所有数据不分页
+     *
+     * @param criteria
+     * @return
+     */
     //@Cacheable
     List<ActModuleDTO> queryAll(ActModuleQueryCriteria criteria);
 
     /**
      * 根据ID查询
+     *
      * @param id
      * @return
      */
@@ -42,6 +46,7 @@ public interface ActModuleService {
 
     /**
      * 创建
+     *
      * @param resources
      * @return
      */
@@ -50,6 +55,7 @@ public interface ActModuleService {
 
     /**
      * 编辑
+     *
      * @param resources
      */
     //@CacheEvict(allEntries = true)
@@ -57,6 +63,7 @@ public interface ActModuleService {
 
     /**
      * 删除
+     *
      * @param id
      */
     //@CacheEvict(allEntries = true)
@@ -65,6 +72,14 @@ public interface ActModuleService {
     ActResponse addActInfo(ActModule actInfo);
 
     List<ActModule> findActInfo();
+
+    /**
+     * 活动信息保存
+     *
+     * @param actInfo
+     * @return
+     */
+    ActResponse saveActInfo(ActModule actInfo);
 
     ActResponse changActInfoLeveL(Boolean isDown, String actCode);
 }

@@ -65,7 +65,48 @@ public interface MallService extends IService<Mall> {
      */
     void delete(Integer id);
 
+    /**
+     * 通过活动code查询此活动下的所有商场信息
+     *
+     * @param actCode
+     * @return
+     */
+    ActResponse findMallByActCode(String actCode);
+
+    /**
+     * 活动下商场信息修改保存
+     *
+     * @param actCode
+     * @param mallList
+     * @return
+     */
+    ActResponse saveMallInfo(String actCode, List<Mall> mallList);
+
+    /**
+     * 修改活动默认商场
+     *
+     * @param omsCode
+     * @return
+     */
+    ActResponse changeDefultMall(String omsCode);
+
+    /**
+     * 查询活动下所有商场
+     *
+     * @param source
+     * @return
+     */
+    List<Mall> listMallByAct(String source);
+
     void syncMallInfo();
+
+    /**
+     * 判断当前actCode是否可用
+     *
+     * @param actCode
+     * @return
+     */
+    String checkActCode(String actCode);
 
     ActResponse uploadMallinfo(String actCode, MultipartFile file);
 }

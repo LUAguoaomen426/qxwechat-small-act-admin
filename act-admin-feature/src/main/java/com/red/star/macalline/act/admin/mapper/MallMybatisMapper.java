@@ -38,9 +38,39 @@ public interface MallMybatisMapper extends BaseMapper<Mall> {
      */
     void insertActMallMerge(@Param("actCode") String actCode, @Param("mallList") List<Mall> mallList);
 
-    void updateActMergeIsJoinByActCode(String actCode, boolean b);
+    /**
+     * 通过活动ID查询所有商场信息
+     *
+     * @param actCode
+     * @return
+     */
+    List<Mall> findMalInfoByActCode(@Param("actCode") String actCode);
 
+
+    /**
+     * 更新 tb_act_mall_merge,is_join 字段取list中的值
+     *
+     * @param actCode
+     * @param mallList
+     */
     void updateActMallMerge(@Param("actCode") String actCode, @Param("mallList") List<Mall> mallList);
+
+    /**
+     * 根据city将的defultEnable设置为0
+     *
+     * @param city
+     */
+    void updateActMallDefultEnableByCity(@Param("city") String city);
+
+    /**
+     * 查询活动下商场列表
+     *
+     * @param actCode 活动编码
+     * @return 商场列表
+     */
+    List<Mall> listMallByAct(String actCode);
+
+    void updateActMergeIsJoinByActCode(String actCode, boolean b);
 
     List<Mall> findMallDefultInfo();
 }

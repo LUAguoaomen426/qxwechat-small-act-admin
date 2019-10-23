@@ -84,6 +84,12 @@ spring:
       # 生产环境设置成 none，避免程序运行时自动更新数据库结构
       ddl-auto: update
     show-sql: true
+  rabbitmq:
+    addresses: 47.111.155.104:5672
+    username: macalline_mq
+    password: macalline_mq@5621df08A9df9E0
+    virtual-host: dev
+    publisher-confirms: true
 
 #jwt
 jwt:

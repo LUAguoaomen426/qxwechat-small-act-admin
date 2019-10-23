@@ -23,6 +23,14 @@ public interface ActModuleMybatisMapper extends BaseMapper<ActModule> {
      */
     List<ActModule> listEnableAct();
 
+
+    /**
+     * 通过posterId查询source
+     * @param posterId
+     * @return
+     */
+    String posterIdConvertToActCode(@Param("posterId")String posterId);
+
     Integer findMaxLevel();
     /**
      * 查询要移动的下一个级别的信息

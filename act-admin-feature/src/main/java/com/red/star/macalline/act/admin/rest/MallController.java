@@ -4,6 +4,8 @@ import com.red.star.macalline.act.admin.aop.log.Log;
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
+import com.red.star.macalline.act.admin.service.ComService;
+import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.MallService;
 import com.red.star.macalline.act.admin.service.dto.MallQueryCriteria;
 import io.swagger.annotations.Api;
@@ -17,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -30,6 +33,9 @@ public class MallController {
 
     @Autowired
     private MallService mallService;
+
+    @Resource
+    private ComService comService;
 
     @Log("查询TbWapMall")
     @ApiOperation(value = "查询TbWapMall")
@@ -95,5 +101,62 @@ public class MallController {
 
 
 
+
+    /**
+     * 查询某次活动下的商场信息
+     *
+     * @param actCode
+     * @return
+     */
+    @Log("查询某次活动下的商场信息")
+    @ApiOperation(value = "查询某次活动下的商场信息")
+    @GetMapping(value = "/{actCode}/mallInfo")
+    public ActResponse findMallByActCode(@PathVariable("actCode") String actCode) {
+        ActResponse res = mallService.findMallByActCode(actCode);
+        return res;
+    }
+
+    /**
+     * 某次活动商场数据保存
+     *
+     * @param actCode
+     * @param mallList
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/{actCode}/mallInfo/save")
+    public ActResponse saveMallInfo(@PathVariable("actCode") String actCode, @RequestBody List<Mall> mallList) {
+        ActResponse actResponse = mallService.saveMallInfo(actCode, mallList);
+        return actResponse;
+    }
+
+
+    /**
+     * 更改默认商场
+     *
+     * @param omsCode
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/mallBaseInfo/changeDefult")
+    public ActResponse changeDefultMall(@RequestParam("omsCode") String omsCode) {
+        ActResponse actResponse = mallService.changeDefultMall(omsCode);
+        return actResponse;
+    }
+
+
+    /**
+     * 刷新商场配置
+     *
+     * @param actCode
+     * @param omsCode
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/{actCode}/mallInfo/refresh")
+    public ActResponse reflushMall(@PathVariable("actCode") String actCode, @RequestParam("omsCode") String omsCode) {
+        comService.preheatMallExtendInfo(actCode, omsCode);
+        return ActResponse.buildSuccessResponse();
+    }
 
 }

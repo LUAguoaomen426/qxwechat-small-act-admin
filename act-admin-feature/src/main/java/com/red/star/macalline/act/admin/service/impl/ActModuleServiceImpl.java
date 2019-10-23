@@ -1,15 +1,19 @@
 package com.red.star.macalline.act.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.red.star.macalline.act.admin.constant.CacheConstant;
+import com.red.star.macalline.act.admin.constant.RabbitConstant;
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.exception.EntityExistException;
 import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
 import com.red.star.macalline.act.admin.mapper.MallMybatisMapper;
+import com.red.star.macalline.act.admin.rabbitmq.RabbitForwardService;
 import com.red.star.macalline.act.admin.repository.ActModuleRepository;
 import com.red.star.macalline.act.admin.service.ActModuleService;
+import com.red.star.macalline.act.admin.service.MallService;
 import com.red.star.macalline.act.admin.service.dto.ActModuleDTO;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
 import com.red.star.macalline.act.admin.service.mapper.ActModuleMapper;
@@ -46,6 +50,9 @@ public class ActModuleServiceImpl implements ActModuleService {
     private ActModuleMapper actModuleMapper;
 
     @Resource
+    private MallService mallService;
+
+    @Resource
     private ActModuleMybatisMapper actModuleMybatisMapper;
 
     @Resource
@@ -53,6 +60,9 @@ public class ActModuleServiceImpl implements ActModuleService {
 
     @Resource
     private MallMybatisMapper mallMybatisMapper;
+
+    @Resource
+    private RabbitForwardService rabbitForwardService;
 
     @Override
     public Map<String, Object> queryAll(ActModuleQueryCriteria criteria, Pageable pageable) {
@@ -100,6 +110,57 @@ public class ActModuleServiceImpl implements ActModuleService {
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         actModuleRepository.deleteById(id);
+    }
+
+    @Override
+    public ActResponse saveActInfo(ActModule actInfo) {
+        if (ObjectUtils.isEmpty(actInfo)) {
+            return ActResponse.buildErrorResponse("参数有误");
+        }
+        String res = mallService.checkActCode(actInfo.getActCode());
+        if (!"SUCCESS".equals(res)) {
+            return ActResponse.buildErrorResponse(res);
+        }
+        ActModule queryCondition = new ActModule();
+        queryCondition.setActCode(actInfo.getActCode());
+        ActModule oldActModule = actModuleMybatisMapper.selectOne(new QueryWrapper<ActModule>().eq("actCode", queryCondition.getActCode()));
+        if (actInfo.getModuleType() == 0) {
+            actInfo.setLinkUrl(null);
+            actInfo.setShowImage(null);
+        }
+        actInfo.setUpdateTime(new Date());
+        actInfo.setShowImage(removeImageWatermark(actInfo.getShowImage()));
+
+        actModuleMybatisMapper.update(actInfo, new UpdateWrapper<ActModule>()
+                .eq("actCode", actInfo.getActCode()));
+
+
+        //刷新缓存
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actInfo.getActCode() + CacheConstant.CACHE_KEY_HOME_LINK);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_LIST);
+        if (actInfo.getSubType().equals(1)) {
+            redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_MODULE + actInfo.getActCode());
+            redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_MODULE_POSTER_ID + actInfo.getPosterId());
+            redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_MODULE_POSTER_ID + oldActModule.getPosterId());
+        }
+
+        //发送MQ通知实例刷新缓存
+        rabbitForwardService.sendMsgToFanoutExchange(RabbitConstant.FANOUT_ACT_REFRESH, actInfo.getActCode());
+        return ActResponse.buildSuccessResponse("SUCCESS");
+    }
+
+    /**
+     * 添加!用于移除上传图片中的水印
+     */
+    public String removeImageWatermark(String imageUrl) {
+        if (!ObjectUtils.isEmpty(imageUrl) && imageUrl.endsWith("!")) {
+            return imageUrl;
+        }
+        if (!ObjectUtils.isEmpty(imageUrl) && !imageUrl.endsWith("!")) {
+            return imageUrl + "!";
+        }
+
+        return null;
     }
 
     /**
@@ -172,7 +233,7 @@ public class ActModuleServiceImpl implements ActModuleService {
     @Override
     @Transactional(readOnly = false)
     public ActResponse changActInfoLeveL(Boolean isDown, String actCode) {
-        String res = checkActCode(actCode);
+        String res = mallService.checkActCode(actCode);
         if (!"SUCCESS".equals(res)) {
             return ActResponse.buildErrorResponse(res);
         }
@@ -195,38 +256,5 @@ public class ActModuleServiceImpl implements ActModuleService {
         return ActResponse.buildSuccessResponse();
     }
 
-
-    /**
-     * 添加!用于移除上传图片中的水印
-     */
-    public String removeImageWatermark(String imageUrl) {
-        if (!ObjectUtils.isEmpty(imageUrl) && imageUrl.endsWith("!")) {
-            return imageUrl;
-        }
-        if (!ObjectUtils.isEmpty(imageUrl) && !imageUrl.endsWith("!")) {
-            return imageUrl + "!";
-        }
-
-        return null;
-    }
-
-    /**
-     * 判断当前actCode是否可用
-     *
-     * @param actCode
-     * @return
-     */
-    private String checkActCode(String actCode) {
-        if (ObjectUtils.isEmpty(actCode)) {
-            return "参数有误";
-        }
-        ActModule actModule = new ActModule();
-        actModule.setActCode(actCode);
-
-        if (actModuleMybatisMapper.selectCount(new QueryWrapper<ActModule>().eq("act_code", actCode)) != 1) {
-            return "actCode不存在";
-        }
-        return "SUCCESS";
-    }
 
 }

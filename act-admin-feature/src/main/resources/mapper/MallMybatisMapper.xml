@@ -66,4 +66,52 @@
         from tb_wap_mall
     </select>
 
+    <select id="findMalInfoByActCode" resultType="com.red.star.macalline.act.admin.domain.Mall">
+        SELECT m.oms_code,
+               m.mall_code,
+               m.mall_name,
+               m.province,
+               m.city,
+               m.self_flag,
+               m.default_enable,
+               m.entrance_enable,
+               me.is_join
+        FROM tb_wap_mall AS m,
+             tb_wap_act_mall_merge me
+        WHERE m.oms_code = me.oms_code
+          and me.act_code = #{actCode}
+        order by m.province, m.city, m.oms_code
+    </select>
+
+    <update id="updateActMallMerge">
+        <foreach collection="mallList" item="list" separator=";">
+            update tb_wap_act_mall_merge
+            set is_join = #{list.isJoin},
+            update_time = now()
+            where oms_code=#{list.omsCode}
+            and act_code = #{actCode}
+        </foreach>
+    </update>
+
+    <update id="updateActMallDefultEnableByCity">
+        update tb_wap_mall
+           set default_enable = 0
+           where city = #{city}
+    </update>
+
+    <!-- 根据活动查询商场 -->
+    <select id="listMallByAct" resultType="com.red.star.macalline.act.admin.domain.Mall">
+        SELECT tm.province,
+               tm.city,
+               tm.mall_name,
+               tm.oms_code,
+               tm.mall_code,
+               tm.is_ml
+        FROM tb_wap_mall AS tm
+                 JOIN tb_wap_act_mall_merge AS tmm ON tm.oms_code = tmm.oms_code
+        WHERE tmm.act_code = #{actCode}
+          AND tmm.is_join = 1
+
+    </select>
+
 </mapper>

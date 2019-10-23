@@ -1,20 +1,22 @@
 package com.red.star.macalline.act.admin.domain;
 
-import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import lombok.Data;
+
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Date;
 
 /**
-* @author AMGuo
-* @date 2019-10-22
-*/
+ * @author AMGuo
+ * @date 2019-10-22
+ */
 @Entity
 @Data
-@Table(name="tb_wap_act_module")
+@Table(name = "tb_wap_act_module")
 public class ActModule implements Serializable {
 
     // 主键ID
@@ -24,7 +26,7 @@ public class ActModule implements Serializable {
     private Integer id;
 
     // 活动code
-    @Column(name = "act_code",unique = true,nullable = false)
+    @Column(name = "act_code", unique = true, nullable = false)
     private String actCode;
 
     // 活动结束时间
@@ -32,15 +34,15 @@ public class ActModule implements Serializable {
     private Timestamp endTime;
 
     // 模块名称
-    @Column(name = "module_name",nullable = false)
+    @Column(name = "module_name", nullable = false)
     private String moduleName;
 
     // 模块英文名称
-    @Column(name = "second_module_name",nullable = false)
+    @Column(name = "second_module_name", nullable = false)
     private String secondModuleName;
 
     // 模块类型 1:H5链接 2:小程序链接 0 不可变  3：其它（非红星美凯龙小程序）小程序链接
-    @Column(name = "module_type",nullable = false)
+    @Column(name = "module_type", nullable = false)
     private Integer moduleType;
 
     // 展示图片
@@ -107,7 +109,7 @@ public class ActModule implements Serializable {
     @Column(name = "channel_id")
     private String channelId;
 
-    public void copy(ActModule source){
-        BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
+    public void copy(ActModule source) {
+        BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
     }
 }
