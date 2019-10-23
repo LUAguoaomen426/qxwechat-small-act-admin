@@ -6,12 +6,14 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Maps;
 import com.red.star.macalline.act.admin.constant.CacheConstant;
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
 import com.red.star.macalline.act.admin.domain.Mall;
+import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.entity.MallMsgBO;
 import com.red.star.macalline.act.admin.exception.EntityExistException;
 import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
@@ -70,6 +72,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
     private ActSpecLinkMybatisMapper actSpecLinkMybatisMapper;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MallServiceImpl.class);
+
     @Override
     public Map<String, Object> queryAll(MallQueryCriteria criteria, Pageable pageable) {
         Page<Mall> page = mallRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
@@ -180,7 +183,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
         List<ActModule> allAct = actModuleMybatisMapper.selectList(null);
         //插入wap_mall表
         if (!ObjectUtils.isEmpty(newMalls)) {
-            for (Mall mall:newMalls){
+            for (Mall mall : newMalls) {
                 mallMybatisMapper.insert(mall);
             }
             for (ActModule actModule : allAct) {
@@ -202,8 +205,9 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
         //删除商场基本数据缓存  活动及特殊链接内商场默认不打开，不用清除缓存
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ENTRANCE);
         for (ActModule actModule : actModuleMybatisMapper.listEnableAct()) {
-            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME+actModule.getActCode());
-        };
+            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME + actModule.getActCode());
+        }
+        ;
         for (Mall mall : updateMall) {
             redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_CODE + mall.getMallCode());
             redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_OMS_CODE + mall.getOmsCode());
@@ -218,14 +222,14 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
      * @param file
      */
     @Transactional(readOnly = false)
-    public void uploadMallinfo(String actCode, MultipartFile file) {
+    public ActResponse uploadMallinfo(String actCode, MultipartFile file) {
         if (ObjectUtils.isEmpty(file)) {
-           // return ActResponse.buildErrorResponse("文件上传错误");
+            return ActResponse.buildErrorResponse("文件上传错误");
         }
         String originalFilename = file.getOriginalFilename();
         String fileSuffix = originalFilename.split("\\.")[1];
         if (!"xls".equalsIgnoreCase(fileSuffix) && !"xlsx".equalsIgnoreCase(fileSuffix)) {
-          //  return ActResponse.buildErrorResponse("文件必须为excel");
+            return ActResponse.buildErrorResponse("文件必须为excel");
         }
         List<Mall> omsCodes = new ArrayList<>();
         try {
@@ -247,10 +251,10 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
             reader.read();
         } catch (IOException e) {
             LOGGER.error("excel上传失败 e:{}", e);
-           // return ActResponse.buildErrorResponse("更新失败");
+            return ActResponse.buildErrorResponse("更新失败");
         }
         if (omsCodes.size() < 1) {
-           // return ActResponse.buildErrorResponse("读取文件失败");
+            return ActResponse.buildErrorResponse("读取文件失败");
         }
         //批量更新对应活动的omsCode
         mallMybatisMapper.updateActMergeIsJoinByActCode(actCode, false);
@@ -258,11 +262,10 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
 
         //清除一下缓存
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ACT + actCode);
-        redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME+actCode);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME + actCode);
         redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_MALL_OMS_CODE);
 
-
-       // return ActResponse.buildSuccessResponse();
+        return ActResponse.buildSuccessResponse();
     }
 
 

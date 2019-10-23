@@ -2,6 +2,7 @@ package com.red.star.macalline.act.admin.rest;
 
 import com.red.star.macalline.act.admin.aop.log.Log;
 import com.red.star.macalline.act.admin.domain.ActModule;
+import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
 import io.swagger.annotations.Api;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author AMGuo
@@ -60,5 +63,29 @@ public class ActModuleController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    /**
+     * 查询所有活动信息
+     *
+     * @return
+     */
+    @ResponseBody
+    @GetMapping(value = "/actInfo")
+    public ActResponse findActInfo() {
+        List<ActModule> actInfo = actModuleService.findActInfo();
+        return ActResponse.buildSuccessResponse("actsInfo", actInfo);
+    }
+
+    /**
+     * 活动信息添加
+     *
+     * @param actInfo
+     * @return
+     */
+    @ResponseBody
+    @PostMapping(value = "/actInfo/add")
+    public ActResponse addActInfo(@RequestBody ActModule actInfo) {
+        ActResponse actResponse = actModuleService.addActInfo(actInfo);
+        return actResponse;
+    }
 
 }

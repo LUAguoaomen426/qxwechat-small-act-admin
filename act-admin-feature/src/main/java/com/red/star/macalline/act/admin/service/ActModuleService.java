@@ -1,6 +1,7 @@
 package com.red.star.macalline.act.admin.service;
 
 import com.red.star.macalline.act.admin.domain.ActModule;
+import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.dto.ActModuleDTO;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
 import org.springframework.data.domain.Pageable;
@@ -60,4 +61,8 @@ public interface ActModuleService {
      */
     //@CacheEvict(allEntries = true)
     void delete(Integer id);
+
+    ActResponse addActInfo(ActModule actInfo);
+
+    List<ActModule> findActInfo();
 }

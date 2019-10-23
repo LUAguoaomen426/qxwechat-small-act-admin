@@ -1,7 +1,9 @@
 package com.red.star.macalline.act.admin.rest;
 
 import com.red.star.macalline.act.admin.aop.log.Log;
+import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.Mall;
+import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.MallService;
 import com.red.star.macalline.act.admin.service.dto.MallQueryCriteria;
 import io.swagger.annotations.Api;
@@ -86,10 +88,12 @@ public class MallController {
      */
     @ResponseBody
     @PostMapping("/{actCode}/mallInfo/upload")
-    public ResponseEntity uploadMallInfo(@PathVariable("actCode") String actCode, @RequestParam("file") MultipartFile file) {
-        mallService.uploadMallinfo(actCode, file);
-        return new ResponseEntity(HttpStatus.OK);
+    public ActResponse uploadMallInfo(@PathVariable("actCode") String actCode, @RequestParam("file") MultipartFile file) {
+        return mallService.uploadMallinfo(actCode, file);
     }
+
+
+
 
 
 }

@@ -61,4 +61,9 @@
         </foreach>
     </update>
 
+    <select id="findMallDefultInfo" resultType="com.red.star.macalline.act.admin.domain.Mall">
+        select oms_code, defult_join as link_show
+        from tb_wap_mall
+    </select>
+
 </mapper>

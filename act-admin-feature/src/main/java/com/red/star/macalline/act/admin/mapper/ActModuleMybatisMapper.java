@@ -22,4 +22,6 @@ public interface ActModuleMybatisMapper extends BaseMapper<ActModule> {
      */
     List<ActModule> listEnableAct();
 
+    Integer findMaxLevel();
+
 }

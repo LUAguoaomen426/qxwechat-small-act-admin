@@ -1,7 +1,9 @@
 package com.red.star.macalline.act.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.Mall;
+import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.dto.MallDTO;
 import com.red.star.macalline.act.admin.service.dto.MallQueryCriteria;
 import org.springframework.data.domain.Pageable;
@@ -65,5 +67,5 @@ public interface MallService extends IService<Mall> {
 
     void syncMallInfo();
 
-    void uploadMallinfo(String actCode, MultipartFile file);
+    ActResponse uploadMallinfo(String actCode, MultipartFile file);
 }

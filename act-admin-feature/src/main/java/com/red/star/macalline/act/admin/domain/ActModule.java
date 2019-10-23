@@ -6,6 +6,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
 * @author AMGuo
@@ -56,15 +57,15 @@ public class ActModule implements Serializable {
 
     // 创建时间
     @Column(name = "create_time")
-    private Timestamp createTime;
+    private Date createTime;
 
     // 更新时间
     @Column(name = "update_time")
-    private Timestamp updateTime;
+    private Date updateTime;
 
     // 是否逻辑删除
     @Column(name = "is_delete")
-    private Integer isDelete;
+    private Boolean isDelete;
 
     // module_type为3时，不为空
     @Column(name = "program_config")
