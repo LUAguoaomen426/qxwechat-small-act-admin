@@ -23,4 +23,36 @@
         from tb_wap_act_module
     </select>
 
+    <select id="findNextLevelInfo" resultType="com.red.star.macalline.act.admin.domain.ActModule">
+        SELECT
+        id,
+        act_code,
+        end_time,
+        module_name,
+        second_module_name,
+        module_type,
+        show_image,
+        link_url,
+        is_delete,
+        order_level
+        FROM
+        `tb_wap_act_module`
+        WHERE
+        <if test="isDown == true">
+            order_level &gt; #{level}
+        </if>
+        <if test="isDown == false">
+            order_level &lt; #{level}
+        </if>
+        AND is_delete = 0
+        ORDER BY
+        <if test="isDown == true">
+            order_level
+        </if>
+        <if test="isDown == false">
+            order_level DESC
+        </if>
+        LIMIT 1
+    </select>
+
 </mapper>

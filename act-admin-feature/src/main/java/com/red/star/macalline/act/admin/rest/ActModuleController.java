@@ -88,4 +88,18 @@ public class ActModuleController {
         return actResponse;
     }
 
+    /**
+     * 当前活动优先级改变
+     *
+     * @param actCode
+     * @param isDown
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/actInfo/changeLevel")
+    public ActResponse changeActInfoLevel(@RequestParam("actCode") String actCode, @RequestParam("isDown") Boolean isDown) {
+        ActResponse actResponse = actModuleService.changActInfoLeveL(isDown, actCode);
+        return actResponse;
+    }
+
 }

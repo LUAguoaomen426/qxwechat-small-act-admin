@@ -107,6 +107,7 @@ public class ActModuleServiceImpl implements ActModuleService {
      *
      * @return
      */
+    @Override
     public List<ActModule> findActInfo() {
         List<ActModule> actModules = actModuleMybatisMapper.selectList(new QueryWrapper<ActModule>().orderByAsc("is_delete", "order_level"));
         return actModules;
@@ -117,6 +118,7 @@ public class ActModuleServiceImpl implements ActModuleService {
      *
      * @param actInfo
      */
+    @Override
     @Transactional(readOnly = false)
     public ActResponse addActInfo(ActModule actInfo) {
         //数据合法性检测
@@ -125,7 +127,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         }
         ActModule selectInfo = new ActModule();
         selectInfo.setActCode(actInfo.getActCode());
-        if (actModuleMybatisMapper.selectCount(new QueryWrapper<ActModule>().eq("act_code",actInfo.getActCode())) > 0) {
+        if (actModuleMybatisMapper.selectCount(new QueryWrapper<ActModule>().eq("act_code", actInfo.getActCode())) > 0) {
             //活动actCode已经存在
             return ActResponse.buildErrorResponse("actCode已存在");
         }
@@ -162,6 +164,37 @@ public class ActModuleServiceImpl implements ActModuleService {
         return ActResponse.buildSuccessResponse("actInfo", actInfo);
     }
 
+    /**
+     * 活动级别改变
+     *
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false)
+    public ActResponse changActInfoLeveL(Boolean isDown, String actCode) {
+        String res = checkActCode(actCode);
+        if (!"SUCCESS".equals(res)) {
+            return ActResponse.buildErrorResponse(res);
+        }
+        ActModule selectInfo = new ActModule();
+        selectInfo.setActCode(actCode);
+        ActModule changeInfo = actModuleMybatisMapper.selectOne(new QueryWrapper<ActModule>().eq("act_code", actCode));
+        Integer originalLevel = changeInfo.getOrderLevel();
+        ActModule beChangeInfo = actModuleMybatisMapper.findNextLevelInfo(originalLevel, isDown);
+        if (ObjectUtils.isEmpty(beChangeInfo)) {
+            return ActResponse.buildErrorResponse("活动已经置顶或置底");
+        }
+        changeInfo.setOrderLevel(beChangeInfo.getOrderLevel());
+        changeInfo.setUpdateTime(new Date());
+        beChangeInfo.setOrderLevel(originalLevel);
+        beChangeInfo.setUpdateTime(new Date());
+        actModuleMybatisMapper.updateById(changeInfo);
+        actModuleMybatisMapper.updateById(beChangeInfo);
+        //刷新缓存
+        redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_LIST);
+        return ActResponse.buildSuccessResponse();
+    }
+
 
     /**
      * 添加!用于移除上传图片中的水印
@@ -175,6 +208,25 @@ public class ActModuleServiceImpl implements ActModuleService {
         }
 
         return null;
+    }
+
+    /**
+     * 判断当前actCode是否可用
+     *
+     * @param actCode
+     * @return
+     */
+    private String checkActCode(String actCode) {
+        if (ObjectUtils.isEmpty(actCode)) {
+            return "参数有误";
+        }
+        ActModule actModule = new ActModule();
+        actModule.setActCode(actCode);
+
+        if (actModuleMybatisMapper.selectCount(new QueryWrapper<ActModule>().eq("act_code", actCode)) != 1) {
+            return "actCode不存在";
+        }
+        return "SUCCESS";
     }
 
 }

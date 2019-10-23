@@ -3,6 +3,7 @@ package com.red.star.macalline.act.admin.service.dto;
 import lombok.Data;
 import java.sql.Timestamp;
 import java.io.Serializable;
+import java.util.Date;
 
 
 /**
@@ -40,13 +41,13 @@ public class ActModuleDTO implements Serializable {
     private Integer orderLevel;
 
     // 创建时间
-    private Timestamp createTime;
+    private Date createTime;
 
     // 更新时间
-    private Timestamp updateTime;
+    private Date updateTime;
 
     // 是否逻辑删除
-    private Integer isDelete;
+    private Boolean isDelete;
 
     // module_type为3时，不为空
     private String programConfig;

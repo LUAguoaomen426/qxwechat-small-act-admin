@@ -65,4 +65,6 @@ public interface ActModuleService {
     ActResponse addActInfo(ActModule actInfo);
 
     List<ActModule> findActInfo();
+
+    ActResponse changActInfoLeveL(Boolean isDown, String actCode);
 }

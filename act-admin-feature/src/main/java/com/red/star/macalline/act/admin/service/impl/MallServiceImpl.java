@@ -221,6 +221,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
      *
      * @param file
      */
+    @Override
     @Transactional(readOnly = false)
     public ActResponse uploadMallinfo(String actCode, MultipartFile file) {
         if (ObjectUtils.isEmpty(file)) {
