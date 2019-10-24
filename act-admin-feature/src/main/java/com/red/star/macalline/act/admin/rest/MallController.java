@@ -1,11 +1,9 @@
 package com.red.star.macalline.act.admin.rest;
 
 import com.red.star.macalline.act.admin.aop.log.Log;
-import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.ComService;
-import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.MallService;
 import com.red.star.macalline.act.admin.service.dto.MallQueryCriteria;
 import io.swagger.annotations.Api;

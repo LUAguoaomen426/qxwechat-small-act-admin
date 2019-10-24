@@ -1,9 +1,12 @@
 package com.red.star.macalline.act.admin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.red.star.macalline.act.admin.domain.bo.LuckyBo;
+import com.red.star.macalline.act.admin.domain.bo.FlopBo;
 import com.red.star.macalline.act.admin.domain.bo.FlopBo;
 import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
 import com.red.star.macalline.act.admin.domain.vo.FlopVo;
+import com.red.star.macalline.act.admin.domain.vo.LuckyVo;
 import com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo;
 import org.apache.ibatis.annotations.Param;
 
@@ -26,6 +29,14 @@ public interface ComMybatisMapper extends BaseMapper {
      * @return
      */
     List<FlopVo> analysisFlopData(@Param("flopBo") FlopBo flopBo);
+
+    /**
+     * 中奖数据
+     *
+     * @param luckyBo
+     * @return
+     */
+    List<LuckyVo> analysisLuckyData(@Param("luckyBo") LuckyBo luckyBo);
 
     /**
      * 根据团id和活动来源获取打卡次数

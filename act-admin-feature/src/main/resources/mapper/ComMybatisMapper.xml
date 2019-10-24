@@ -48,4 +48,43 @@
         GROUP BY DATE_FORMAT(t.create_time, '%Y-%m-%d');
     </select>
 
+    <select id="analysisLuckyData" resultType="com.red.star.macalline.act.admin.domain.vo.LuckyVo">
+        SELECT m.province,
+        m.city,
+        m.mall_name,
+        m.oms_code,
+        u.mobile,
+        e.create_time time,
+        e.ticket_grade grade,
+        e.type
+        FROM tb_wap_event e
+        LEFT JOIN tb_wap_user u ON u.vip_id = e.vip_id
+        LEFT JOIN tb_wap_mall m ON m.oms_code = e.oms_code
+        WHERE e.ticket_id != 0
+        AND e.type like '%${luckyBo.type}%'
+        AND e.source = #{luckyBo.source}
+        <if test="luckyBo.province!=null and luckyBo.province!=''">
+            AND m.province like '%${luckyBo.province}%'
+        </if>
+        <if test="luckyBo.city!=null and luckyBo.city!=''">
+            AND m.city like '%${luckyBo.city}%'
+        </if>
+        <if test="luckyBo.mallName!=null and luckyBo.mallName!=''">
+            AND m.mall_name like '%${luckyBo.mallName}%'
+        </if>
+        <if test="luckyBo.mobile!=null and luckyBo.mobile!=''">
+            AND u.mobile = #{luckyBo.mobile}
+        </if>
+        <if test="luckyBo.grade!=null and luckyBo.grade!=0">
+            AND e.ticket_grade = #{luckyBo.grade}
+        </if>
+        <if test="luckyBo.startTime!=null and luckyBo.startTime!=''">AND e.create_time BETWEEN #{luckyBo.startTime}
+            AND #{luckyBo.endTime}
+        </if>
+        AND e.ticket_get = 1
+        GROUP BY e.vip_id
+        ORDER BY
+        e.create_time DESC
+    </select>
+
 </mapper>

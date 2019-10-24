@@ -90,23 +90,8 @@ public interface MallService extends IService<Mall> {
      */
     ActResponse changeDefultMall(String omsCode);
 
-    /**
-     * 查询活动下所有商场
-     *
-     * @param source
-     * @return
-     */
-    List<Mall> listMallByAct(String source);
-
     void syncMallInfo();
 
-    /**
-     * 判断当前actCode是否可用
-     *
-     * @param actCode
-     * @return
-     */
-    String checkActCode(String actCode);
 
     ActResponse uploadMallinfo(String actCode, MultipartFile file);
 }

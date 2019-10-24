@@ -9,6 +9,7 @@ import com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo;
 import com.red.star.macalline.act.admin.service.dto.ActModuleDTO;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -89,6 +90,40 @@ public interface ActModuleService {
     ActResponse saveActInfo(ActModule actInfo);
 
     ActResponse changActInfoLeveL(Boolean isDown, String actCode);
+
+    /**
+     * 对活动进行逻辑删除
+     *
+     * @param actCode
+     * @return
+     */
+    ActResponse deleteAct(String actCode);
+
+    /**
+     * 判断当前actCode是否可用
+     *
+     * @param actCode
+     * @return
+     */
+    String checkActCode(String actCode);
+
+    /**
+     * 重新启用活动
+     *
+     * @param actCode
+     * @return
+     */
+    ActResponse enableAct(String actCode);
+
+    /**
+     * 根据上传文件批量更新对应的活动特殊链接某商场是否启用
+     *
+     * @param actCode
+     * @param specCode
+     * @param file
+     * @return
+     */
+    ActResponse uploadActSpecLinkInfo(String actCode, String specCode, MultipartFile file);
 
     ActResponse findSpecLink(String actCode);
 

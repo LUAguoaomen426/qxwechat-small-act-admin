@@ -121,7 +121,7 @@ public class ActConfigUtil {
         if (ObjectUtils.isEmpty(act)) {
             ActModule selectInfo = new ActModule();
             selectInfo.setActCode(key);
-            ActModule actModule = actModuleMapper.selectOne(new QueryWrapper<ActModule>().eq("actCode", selectInfo.getActCode()));
+            ActModule actModule = actModuleMapper.selectOne(new QueryWrapper<ActModule>().lambda().eq(ActModule::getActCode, selectInfo.getActCode()));
             if (!ObjectUtils.isEmpty(actModule)) {
                 ConfiguratedAct configuratedAct = new ConfiguratedAct(actModule);
                 String string = JSONObject.toJSONString(configuratedAct);

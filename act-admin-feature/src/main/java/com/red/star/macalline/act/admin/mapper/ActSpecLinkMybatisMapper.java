@@ -23,7 +23,13 @@ public interface ActSpecLinkMybatisMapper extends BaseMapper<ActSpecLink> {
 
     void insertSpecLinkMergeByList(String actCode, String specCode, List<Mall> newMalls);
 
-    Integer selectMaxSort(@Param("specCode") String specCode);
+    /**
+     * 根据actCode、specCode将isShow字段更改
+     * @param actCode
+     * @param specCode
+     * @param isShow
+     */
+    void updateSpecLinkMergerisShow(@Param("actCode")String actCode, @Param("specCode")String specCode, @Param("isShow")Boolean isShow);
 
     /**
      * 批量更新tb_act_mall_spec_merge
@@ -31,6 +37,8 @@ public interface ActSpecLinkMybatisMapper extends BaseMapper<ActSpecLink> {
      * @param mallList
      */
     void updateSpecLinkMergerByList(@Param("actCode")String actCode,@Param("specCode")String specCode, @Param("mallList") List<Mall> mallList);
+
+    Integer selectMaxSort(@Param("specCode") String specCode);
 
     /**
      * 批量删除tb_act_mall_spec_merge

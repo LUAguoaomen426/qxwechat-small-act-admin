@@ -3,6 +3,7 @@ package com.red.star.macalline.act.admin.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.red.star.macalline.act.admin.constant.ActConstant;
 import com.red.star.macalline.act.admin.constant.CacheConstant;
 import com.red.star.macalline.act.admin.constant.Constant;
@@ -17,6 +18,8 @@ import com.red.star.macalline.act.admin.domain.bo.PromotionTicketBo;
 import com.red.star.macalline.act.admin.domain.dto.BoostAwardDTO;
 import com.red.star.macalline.act.admin.domain.dto.TicketInfoDTO;
 import com.red.star.macalline.act.admin.domain.vo.ActGroupTicketV2;
+import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
+import com.red.star.macalline.act.admin.mapper.MallMybatisMapper;
 import com.red.star.macalline.act.admin.util.BeanUtil;
 import com.red.star.macalline.act.admin.util.JsonUtil;
 import com.red.star.macalline.act.admin.util.PriceUtil;
@@ -31,10 +34,8 @@ import org.springframework.util.StopWatch;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -61,6 +62,9 @@ public class ComService {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
+    @Resource
+    private MallMybatisMapper mallMybatisMapper;
+
     /**
      * 预热活动下的基础数据
      *
@@ -69,7 +73,7 @@ public class ComService {
     public void preheat(String source) {
         StopWatch sw = new StopWatch(source + "大促活动——集团缓存刷新");
         sw.start();
-        List<Mall> mallList = mallService.listMallByAct(source);
+        List<Mall> mallList = listMallByAct(source);
         mallList.forEach(entity -> {
             //商场扩展信息预热
             preheatMallExtendInfo(source, entity.getOmsCode());
@@ -714,6 +718,46 @@ public class ComService {
             shameNum = Integer.parseInt(shameNumber);
         }
         return realNum + shameNum;
+    }
+
+    public List<Mall> listMallByAct(String act) {
+        String key = CacheConstant.CACHE_KEY_MALL_LIST_ACT + act;
+        String body = stringRedisTemplate.opsForValue().get(key);
+        List<Mall> result = Lists.newArrayList();
+        if (!ObjectUtils.isEmpty(body)) {
+            result = JSON.parseArray(body, Mall.class);
+        }
+        if (result == null || result.size() == 0) {
+            // 从数据库中获取商场
+            result = mallMybatisMapper.listMallByAct(act);
+            if (result != null && result.size() > 0) {
+                stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(result), CacheConstant.CACHE_EXPIRE_MALL_LIST);
+            }
+        }
+        return result;
+    }
+
+
+    public Map<String, List<ActGroupTicketV2>> getAllDrawTicketInfo(String omsCode, String source, String groupId) {
+        List<ActGroupTicketV2> actAllTicketV2s = getGroupTickets(omsCode, source, groupId);
+        Map<String, List<ActGroupTicketV2>> res = new HashMap<>();
+        for (ActGroupTicketV2 e : actAllTicketV2s) {
+            List<ActGroupTicketV2> gradeList = res.get(e.getGrade());
+            if (ObjectUtils.isEmpty(gradeList)) {
+                gradeList = new ArrayList<>();
+                res.put(e.getGrade(), gradeList);
+            }
+            gradeList.add(e);
+        }
+
+        res.forEach((k, v) -> {
+            v.sort((e1, e2) -> {
+                BigDecimal e1SortFlag = e1.getTicketTypeId().equals(1) ? e1.getCashAmt() : new BigDecimal(e1.getFullcutCutAmt());
+                BigDecimal e2SortFlag = e2.getTicketTypeId().equals(1) ? e2.getCashAmt() : new BigDecimal(e2.getFullcutCutAmt());
+                return e1SortFlag.subtract(e2SortFlag).intValue();
+            });
+        });
+        return res;
     }
 
 

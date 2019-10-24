@@ -8,7 +8,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -23,6 +22,7 @@ import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
 import com.red.star.macalline.act.admin.mapper.ActSpecLinkMybatisMapper;
 import com.red.star.macalline.act.admin.mapper.MallMybatisMapper;
 import com.red.star.macalline.act.admin.repository.MallRepository;
+import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.MallService;
 import com.red.star.macalline.act.admin.service.dto.MallDTO;
 import com.red.star.macalline.act.admin.service.dto.MallQueryCriteria;
@@ -77,6 +77,9 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
 
     @Resource
     private ActSpecLinkMybatisMapper actSpecLinkMybatisMapper;
+
+    @Resource
+    private ActModuleService actModuleService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MallServiceImpl.class);
 
@@ -224,7 +227,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
 
     @Override
     public ActResponse findMallByActCode(String actCode) {
-        String res = checkActCode(actCode);
+        String res = actModuleService.checkActCode(actCode);
         if (!"SUCCESS".equals(res)) {
             return ActResponse.buildErrorResponse(res);
         }
@@ -235,7 +238,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
     @Override
     @Transactional(readOnly = false, rollbackFor = Exception.class)
     public ActResponse saveMallInfo(String actCode, List<Mall> mallList) {
-        String res = checkActCode(actCode);
+        String res = actModuleService.checkActCode(actCode);
         if (!"SUCCESS".equals(res)) {
             return ActResponse.buildErrorResponse(res);
         }
@@ -260,7 +263,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
         }
         Mall selectInfo = new Mall();
         selectInfo.setOmsCode(omsCode);
-        Mall mall = mallMybatisMapper.selectOne(new QueryWrapper<Mall>().eq("omsCode", selectInfo.getOmsCode()));
+        Mall mall = mallMybatisMapper.selectOne(new QueryWrapper<Mall>().lambda().eq(Mall::getOmsCode, selectInfo.getOmsCode()));
         if (ObjectUtils.isEmpty(mall)) {
             return ActResponse.buildErrorResponse("参数有误");
         }
@@ -277,41 +280,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
         return ActResponse.buildErrorResponse("该城市最少需要一个默认商场");
     }
 
-    @Override
-    public List<Mall> listMallByAct(String act) {
-        String key = CacheConstant.CACHE_KEY_MALL_LIST_ACT + act;
-        String body = stringRedisTemplate.opsForValue().get(key);
-        List<Mall> result = Lists.newArrayList();
-        if (!ObjectUtils.isEmpty(body)) {
-            result = JSON.parseArray(body, Mall.class);
-        }
-        if (result == null || result.size() == 0) {
-            // 从数据库中获取商场
-            result = mallMybatisMapper.listMallByAct(act);
-            if (result != null && result.size() > 0) {
-                stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(result), CacheConstant.CACHE_EXPIRE_MALL_LIST);
-            }
-        }
-        return result;
-    }
 
-    /**
-     * 判断当前actCode是否可用
-     *
-     * @param actCode
-     * @return
-     */
-    public String checkActCode(String actCode) {
-        if (ObjectUtils.isEmpty(actCode)) {
-            return "参数有误";
-        }
-        ActModule actModule = new ActModule();
-        actModule.setActCode(actCode);
-        if (actModuleMybatisMapper.selectCount(new QueryWrapper<ActModule>().eq("actCode", actModule.getActCode())) != 1) {
-            return "actCode不存在";
-        }
-        return "SUCCESS";
-    }
 
 
     /**

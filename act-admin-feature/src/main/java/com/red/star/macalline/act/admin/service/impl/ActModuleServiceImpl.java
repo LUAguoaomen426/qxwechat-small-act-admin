@@ -1,5 +1,9 @@
 package com.red.star.macalline.act.admin.service.impl;
 
+import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.ExcelReader;
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -28,7 +32,6 @@ import com.red.star.macalline.act.admin.rabbitmq.RabbitForwardService;
 import com.red.star.macalline.act.admin.repository.ActModuleRepository;
 import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.ComService;
-import com.red.star.macalline.act.admin.service.MallService;
 import com.red.star.macalline.act.admin.service.dto.ActModuleDTO;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
 import com.red.star.macalline.act.admin.service.mapper.ActModuleMapper;
@@ -48,8 +51,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StopWatch;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
@@ -63,14 +69,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ActModuleServiceImpl implements ActModuleService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActModuleService.class);
+
     @Autowired
     private ActModuleRepository actModuleRepository;
 
-    @Autowired
-    private ActModuleMapper actModuleMapper;
-
     @Resource
-    private MallService mallService;
+    private ActModuleMapper actModuleMapper;
 
     @Resource
     private ActModuleMybatisMapper actModuleMybatisMapper;
@@ -92,8 +97,6 @@ public class ActModuleServiceImpl implements ActModuleService {
 
     @Resource
     private ComService comService;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ActModuleServiceImpl.class);
 
     @Override
     public Map<String, Object> queryAll(ActModuleQueryCriteria criteria, Pageable pageable) {
@@ -148,13 +151,13 @@ public class ActModuleServiceImpl implements ActModuleService {
         if (ObjectUtils.isEmpty(actInfo)) {
             return ActResponse.buildErrorResponse("参数有误");
         }
-        String res = mallService.checkActCode(actInfo.getActCode());
+        String res = checkActCode(actInfo.getActCode());
         if (!"SUCCESS".equals(res)) {
             return ActResponse.buildErrorResponse(res);
         }
         ActModule queryCondition = new ActModule();
         queryCondition.setActCode(actInfo.getActCode());
-        ActModule oldActModule = actModuleMybatisMapper.selectOne(new QueryWrapper<ActModule>().eq("actCode", queryCondition.getActCode()));
+        ActModule oldActModule = actModuleMybatisMapper.selectOne(new QueryWrapper<ActModule>().lambda().eq(ActModule::getActCode, queryCondition.getActCode()));
         if (actInfo.getModuleType() == 0) {
             actInfo.setLinkUrl(null);
             actInfo.setShowImage(null);
@@ -211,7 +214,7 @@ public class ActModuleServiceImpl implements ActModuleService {
      * @param actInfo
      */
     @Override
-    @Transactional(readOnly = false)
+    @Transactional(rollbackFor = Exception.class)
     public ActResponse addActInfo(ActModule actInfo) {
         //数据合法性检测
         if (ObjectUtils.isEmpty(actInfo)) {
@@ -262,9 +265,9 @@ public class ActModuleServiceImpl implements ActModuleService {
      * @return
      */
     @Override
-    @Transactional(readOnly = false)
+    @Transactional(rollbackFor = Exception.class)
     public ActResponse changActInfoLeveL(Boolean isDown, String actCode) {
-        String res = mallService.checkActCode(actCode);
+        String res = checkActCode(actCode);
         if (!"SUCCESS".equals(res)) {
             return ActResponse.buildErrorResponse(res);
         }
@@ -287,6 +290,117 @@ public class ActModuleServiceImpl implements ActModuleService {
         return ActResponse.buildSuccessResponse();
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ActResponse deleteAct(String actCode) {
+        String res = checkActCode(actCode);
+        if (!"SUCCESS".equals(res)) {
+            return ActResponse.buildErrorResponse(res);
+        }
+        ActModule selectInfo = new ActModule();
+        selectInfo.setActCode(actCode);
+        ActModule actModule = actModuleMybatisMapper.selectOne(new QueryWrapper<ActModule>().lambda().eq(ActModule::getActCode, selectInfo.getActCode()));
+        if (actModule.getIsDelete()) {
+            return ActResponse.buildErrorResponse("此活动已下架");
+        }
+        actModule.setOrderLevel(-1);
+        actModule.setIsDelete(true);
+        actModule.setUpdateTime(new Date());
+        actModuleMybatisMapper.update(actModule, new UpdateWrapper<ActModule>().eq("id", actModule.getId()));
+        //刷新缓存
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_HOME_LINK);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_LIST);
+        return ActResponse.buildSuccessResponse();
+    }
+
+    /**
+     * 判断当前actCode是否可用
+     *
+     * @param actCode
+     * @return
+     */
+    @Override
+    public String checkActCode(String actCode) {
+        if (ObjectUtils.isEmpty(actCode)) {
+            return "参数有误";
+        }
+        ActModule actModule = new ActModule();
+        actModule.setActCode(actCode);
+        if (actModuleMybatisMapper.selectCount(new QueryWrapper<ActModule>().lambda().eq(ActModule::getActCode, actModule.getActCode())) != 1) {
+            return "actCode不存在";
+        }
+        return "SUCCESS";
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ActResponse enableAct(String actCode) {
+        String res = checkActCode(actCode);
+        if (!"SUCCESS".equals(res)) {
+            return ActResponse.buildErrorResponse(res);
+        }
+        ActModule selectInfo = new ActModule();
+        selectInfo.setActCode(actCode);
+        ActModule actModule = actModuleMybatisMapper.selectOne(new QueryWrapper<ActModule>().lambda().eq(ActModule::getActCode, selectInfo.getActCode()));
+        if (!actModule.getIsDelete()) {
+            return ActResponse.buildErrorResponse("此活动未下架");
+        }
+        Integer maxLevel = actModuleMybatisMapper.findMaxLevel();
+        actModule.setIsDelete(false);
+        actModule.setOrderLevel(maxLevel + 1);
+        actModule.setUpdateTime(new Date());
+        actModuleMybatisMapper.update(actModule, new UpdateWrapper<ActModule>().eq("id", actModule.getId()));
+        //刷新缓存
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_HOME_LINK);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_LIST);
+        return ActResponse.buildSuccessResponse();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ActResponse uploadActSpecLinkInfo(String actCode, String specCode, MultipartFile file) {
+        if (ObjectUtils.isEmpty(file)) {
+            return ActResponse.buildErrorResponse("文件上传错误");
+        }
+        String originalFilename = file.getOriginalFilename();
+        String fileSuffix = originalFilename.split("\\.")[1];
+        if (!"xls".equalsIgnoreCase(fileSuffix) && !"xlsx".equalsIgnoreCase(fileSuffix)) {
+            return ActResponse.buildErrorResponse("文件必须为excel");
+        }
+
+        ArrayList<Mall> malls = new ArrayList<>();
+        try {
+            ExcelReader reader = EasyExcelFactory.getReader(new BufferedInputStream(file.getInputStream()), new AnalysisEventListener<List<String>>() {
+                @Override
+                public void invoke(List<String> list, AnalysisContext analysisContext) {
+                    Mall mall = new Mall();
+                    mall.setOmsCode(list.get(0));
+                    mall.setLinkShow(true);
+                    malls.add(mall);
+                }
+
+                @Override
+                public void doAfterAllAnalysed(AnalysisContext analysisContext) {
+
+                }
+            });
+            reader.read();
+        } catch (IOException e) {
+            LOGGER.error("excel上传失败 e:{}", e);
+            return ActResponse.buildErrorResponse("更新失败");
+        }
+        if (malls.size() < 1) {
+            return ActResponse.buildErrorResponse("读取文件失败");
+        }
+        actSpecLinkMybatisMapper.updateSpecLinkMergerisShow(actCode, specCode, false);
+        actSpecLinkMybatisMapper.updateSpecLinkMergerByList(actCode, specCode, malls);
+        //删除所有商场广告位缓存
+        for (Mall m : mallMybatisMapper.selectList(null)) {
+            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
+        }
+        return ActResponse.buildSuccessResponse();
+    }
+
     /**
      * 通过活动信息查询当前活动下的所有特殊链接信息
      *
@@ -295,7 +409,7 @@ public class ActModuleServiceImpl implements ActModuleService {
      */
     @Override
     public ActResponse findSpecLink(String actCode) {
-        String res = mallService.checkActCode(actCode);
+        String res = checkActCode(actCode);
         if (!"SUCCESS".equals(res)) {
             return ActResponse.buildErrorResponse(res);
         }
@@ -333,7 +447,7 @@ public class ActModuleServiceImpl implements ActModuleService {
     @Override
     @Transactional(readOnly = false)
     public ActResponse addSpecLink(String actCode, ActSpecLink actSpecLink) {
-        String res = mallService.checkActCode(actCode);
+        String res = checkActCode(actCode);
         if (!"SUCCESS".equals(res)) {
             return ActResponse.buildErrorResponse(res);
         }
@@ -386,7 +500,7 @@ public class ActModuleServiceImpl implements ActModuleService {
     @Transactional(readOnly = false)
     public ActResponse saveSpecLink(String actCode, ActSpecLink actSpecLink) {
 
-        String res = mallService.checkActCode(actCode);
+        String res = checkActCode(actCode);
         if (!"SUCCESS".equals(res)) {
             return ActResponse.buildErrorResponse(res);
         }
@@ -433,7 +547,7 @@ public class ActModuleServiceImpl implements ActModuleService {
     @Override
     @Transactional(readOnly = false)
     public ActResponse deleteSpecLink(String actCode, ActSpecLink actSpecLink) {
-        String res = mallService.checkActCode(actCode);
+        String res = checkActCode(actCode);
         if (!"SUCCESS".equals(res)) {
             return ActResponse.buildErrorResponse(res);
         }
@@ -486,7 +600,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         sw.start("两天活动购买人数添加");
 
         //先查表里所有的商场omsCode
-        List<Mall> mallList = mallService.listMallByAct(source);
+        List<Mall> mallList = comService.listMallByAct(source);
         List<Integer> groupIdArray = groupIdArray(source);
         HashMap<String, String> res = new HashMap<>();
         String tsnKey = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_T_S_N;
@@ -536,7 +650,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         ArrayList<Map<String, String>> res = new ArrayList<>();
         ActModule queryCondition = new ActModule();
         queryCondition.setSubType(1);
-        List<ActModule> actModules = actModuleMybatisMapper.selectList(new QueryWrapper<ActModule>().eq("sub_type",1));
+        List<ActModule> actModules = actModuleMybatisMapper.selectList(new QueryWrapper<ActModule>().eq("sub_type", 1));
         for (ActModule actModule : actModules) {
             HashMap<String, String> nameAndSource = new HashMap<>();
             nameAndSource.put("label", actModule.getModuleName());
@@ -552,9 +666,10 @@ public class ActModuleServiceImpl implements ActModuleService {
      * @param sourcePvUvBo
      * @return
      */
+    @Override
     public List<SourcePvUvVo> analysisPVUVData(SourcePvUvBo sourcePvUvBo) {
         String key = CacheConstant.CACHE_KEY_PREFIX + sourcePvUvBo.getSource() + CacheConstant.CACHE_KEY_PVUV;
-        String s = (String)redisTemplate.opsForValue().get(key);
+        String s = (String) redisTemplate.opsForValue().get(key);
         List<SourcePvUvVo> sourcePvUvVoList = Lists.newArrayList();
         if (ObjectUtils.isEmpty(s) || sourcePvUvBo.isActualFlag()) {
             SourcePvUvVo sourcePvUvVo = new SourcePvUvVo();

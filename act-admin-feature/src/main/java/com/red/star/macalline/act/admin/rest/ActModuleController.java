@@ -19,16 +19,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.xml.ws.Response;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -102,6 +96,7 @@ public class ActModuleController {
         ActResponse actResponse = actModuleService.addActInfo(actInfo);
         return actResponse;
     }
+
     /**
      * 活动信息修改
      *
@@ -128,6 +123,48 @@ public class ActModuleController {
     public ActResponse changeActInfoLevel(@RequestParam("actCode") String actCode, @RequestParam("isDown") Boolean isDown) {
         ActResponse actResponse = actModuleService.changActInfoLeveL(isDown, actCode);
         return actResponse;
+    }
+
+    /**
+     * 活动逻辑删除-下架
+     *
+     * @param actCode
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/actInfo/delete")
+    public ActResponse deleteAct(@RequestParam("actCode") String actCode) {
+        ActResponse actResponse = actModuleService.deleteAct(actCode);
+        return actResponse;
+    }
+
+
+    /**
+     * 活动启用-上架
+     *
+     * @param actCode
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("actInfo/enable")
+    public ActResponse enableAct(@RequestParam("actCode") String actCode) {
+        ActResponse actResponse = actModuleService.enableAct(actCode);
+        return actResponse;
+    }
+
+
+    /**
+     * 根据上传文件批量更新对应的活动特殊链接某商场是否启用
+     *
+     * @param actCode
+     * @param specCode
+     * @param file
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/{actCode}/actSpeclink/upload")
+    public ActResponse uploadActSpecLinkInfo(@PathVariable("actCode") String actCode, @RequestParam("specCode") String specCode, @RequestParam("file") MultipartFile file) {
+        return actModuleService.uploadActSpecLinkInfo(actCode, specCode, file);
     }
 
     /**
