@@ -77,6 +77,9 @@ public class ActModuleController {
      *
      * @return
      */
+    @Log("查询所有活动信息")
+    @ApiOperation(value = "查询所有活动信息")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_LIST')")
     @ResponseBody
     @GetMapping(value = "/actInfo")
     public ActResponse findActInfo() {
@@ -90,6 +93,9 @@ public class ActModuleController {
      * @param actInfo
      * @return
      */
+    @Log("活动信息添加")
+    @ApiOperation(value = "活动信息添加")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_CREATE')")
     @ResponseBody
     @PostMapping(value = "/actInfo/add")
     public ActResponse addActInfo(@RequestBody ActModule actInfo) {
@@ -103,6 +109,9 @@ public class ActModuleController {
      * @param actInfo
      * @return
      */
+    @Log("活动信息修改")
+    @ApiOperation(value = "活动信息修改")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_UPDATE')")
     @ResponseBody
     @PostMapping(value = "/actInfo/save")
     public ActResponse saveActInfo(@RequestBody ActModule actInfo) {
@@ -118,6 +127,9 @@ public class ActModuleController {
      * @param isDown
      * @return
      */
+    @Log("当前活动优先级改变")
+    @ApiOperation(value = "当前活动优先级改变")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_DOWN')")
     @ResponseBody
     @PostMapping("/actInfo/changeLevel")
     public ActResponse changeActInfoLevel(@RequestParam("actCode") String actCode, @RequestParam("isDown") Boolean isDown) {
@@ -131,6 +143,9 @@ public class ActModuleController {
      * @param actCode
      * @return
      */
+    @Log("活动逻辑删除-下架")
+    @ApiOperation(value = "活动逻辑删除-下架")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_PULL_OFF')")
     @ResponseBody
     @PostMapping("/actInfo/delete")
     public ActResponse deleteAct(@RequestParam("actCode") String actCode) {
@@ -145,6 +160,9 @@ public class ActModuleController {
      * @param actCode
      * @return
      */
+    @Log("活动启用-上架")
+    @ApiOperation(value = "活动启用-上架")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_PULL_ON')")
     @ResponseBody
     @PostMapping("actInfo/enable")
     public ActResponse enableAct(@RequestParam("actCode") String actCode) {
@@ -161,6 +179,9 @@ public class ActModuleController {
      * @param file
      * @return
      */
+    @Log("活动特殊链接上传")
+    @ApiOperation(value = "活动特殊链接上传")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_UPLOAD')")
     @ResponseBody
     @PostMapping("/{actCode}/actSpeclink/upload")
     public ActResponse uploadActSpecLinkInfo(@PathVariable("actCode") String actCode, @RequestParam("specCode") String specCode, @RequestParam("file") MultipartFile file) {
@@ -173,6 +194,9 @@ public class ActModuleController {
      * @param actCode
      * @return
      */
+    @Log("活动特殊链接")
+    @ApiOperation(value = "活动特殊链接")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_LIST')")
     @ResponseBody
     @GetMapping("/{actCode}/actSpecLink")
     public ActResponse findSpecLink(@PathVariable("actCode") String actCode) {
@@ -186,6 +210,9 @@ public class ActModuleController {
      * @param actCode
      * @param actSpecLink
      */
+    @Log("增加广告位")
+    @ApiOperation(value = "增加广告位")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_ADD')")
     @ResponseBody
     @PostMapping("/{actCode}/actSpecLink/add")
     public ActResponse addSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
@@ -199,6 +226,9 @@ public class ActModuleController {
      * @param actCode
      * @param actSpecLink
      */
+    @Log("增加广告位")
+    @ApiOperation(value = "增加广告位")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_UPDATE')")
     @ResponseBody
     @PostMapping("/{actCode}/actSpecLink/save")
     public ActResponse saveSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
@@ -212,6 +242,9 @@ public class ActModuleController {
      * @param actSpecLink
      * @return
      */
+    @Log("删除广告位")
+    @ApiOperation(value = "删除广告位")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_DELETE')")
     @ResponseBody
     @PostMapping("/{actCode}/actSpecLink/delete")
     public ActResponse deleteSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
@@ -223,16 +256,22 @@ public class ActModuleController {
      *
      * @return
      */
+    @Log("参团/单品券人数管理")
+    @ApiOperation(value = "参团/单品券人数管理")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_GROUP_LIST')")
     @RequestMapping("/number")
     public ActResponse number(String source) {
         return actModuleService.number(source);
     }
 
     /**
-     * 添加额外人数
+     * 添加额外人数 ACT__GROUP_ADD
      *
      * @return
      */
+    @Log("添加额外人数")
+    @ApiOperation(value = "添加额外人数")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_GROUP_ADD')")
     @ResponseBody
     @PostMapping("/addGroupNumber")
     public ActResponse addGroupNumber(String source, Integer addGroupNumber) {
@@ -245,6 +284,9 @@ public class ActModuleController {
      *
      * @return
      */
+    @Log("添加单品券额外人数")
+    @ApiOperation(value = "添加单品券额外人数")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_TICKET_ADD')")
     @ResponseBody
     @PostMapping("/addTicketNumber")
     public ActResponse addTicketNumber(String source, ActExtraNumber actExtraNumber) throws IOException {
@@ -258,6 +300,9 @@ public class ActModuleController {
      * @param source
      * @return
      */
+    @Log("团打卡数据")
+    @ApiOperation(value = "团打卡数据")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_CARD_LIST')")
     @RequestMapping("/findGroupCountBySource")
     @ResponseBody
     public ActResponse<List<Map>> findGroupCountBySource(String source) {
@@ -267,6 +312,7 @@ public class ActModuleController {
         List<Map> actGroupVO = actModuleService.findGroupCountBySource(source);
         return ActResponse.buildSuccessResponse(actGroupVO);
     }
+
 
     @RequestMapping("findAllActNameAndSource")
     @ResponseBody
@@ -281,6 +327,9 @@ public class ActModuleController {
      * @param sourcePvUvBo
      * @return
      */
+    @Log("活动pv、uv")
+    @ApiOperation(value = "活动pv、uv")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT__DATA_PV')")
     @ResponseBody
     @PostMapping(value = "/analysisPVUVData")
     public ActResponse<SourcePvUvVo> analysisPVUVData(@RequestBody @Valid SourcePvUvBo sourcePvUvBo) {
