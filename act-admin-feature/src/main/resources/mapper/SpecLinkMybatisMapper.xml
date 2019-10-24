@@ -46,4 +46,23 @@
 
     </insert>
 
+    <select id="selectMaxSort" resultType="java.lang.Integer">
+        SELECT MAX(t.sort) FROM tb_wap_act_spec_link t WHERE t.spec_code != #{specCode}
+    </select>
+
+    <update id="updateSpecLinkMergerByList">
+        <foreach collection="mallList" item="list" separator=";">
+            update tb_wap_act_mall_spec_merge
+            set is_show = #{list.linkShow},update_time =now()
+            where oms_code =#{list.omsCode}
+            and act_code = #{actCode}
+            and spec_code = #{specCode}
+        </foreach>
+    </update>
+
+    <delete id="deleteSpecLinkMergerByList">
+        delete from tb_wap_act_mall_spec_merge
+        where act_code = #{actCode}
+        and spec_code = #{specCode}
+    </delete>
 </mapper>

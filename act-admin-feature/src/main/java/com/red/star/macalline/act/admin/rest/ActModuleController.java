@@ -2,6 +2,7 @@ package com.red.star.macalline.act.admin.rest;
 
 import com.red.star.macalline.act.admin.aop.log.Log;
 import com.red.star.macalline.act.admin.domain.ActModule;
+import com.red.star.macalline.act.admin.domain.ActSpecLink;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
@@ -113,6 +114,57 @@ public class ActModuleController {
     public ActResponse changeActInfoLevel(@RequestParam("actCode") String actCode, @RequestParam("isDown") Boolean isDown) {
         ActResponse actResponse = actModuleService.changActInfoLeveL(isDown, actCode);
         return actResponse;
+    }
+
+    /**
+     * 查询某次活动特殊链接
+     *
+     * @param actCode
+     * @return
+     */
+    @ResponseBody
+    @GetMapping("/{actCode}/actSpecLink")
+    public ActResponse findSpecLink(@PathVariable("actCode") String actCode) {
+        ActResponse actResponse = actModuleService.findSpecLink(actCode);
+        return actResponse;
+    }
+
+    /**
+     * 某次活动特殊链接新增
+     *
+     * @param actCode
+     * @param actSpecLink
+     */
+    @ResponseBody
+    @PostMapping("/{actCode}/actSpecLink/add")
+    public ActResponse addSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
+        ActResponse actResponse = actModuleService.addSpecLink(actCode, actSpecLink);
+        return actResponse;
+    }
+
+    /**
+     * 特殊链接保存
+     *
+     * @param actCode
+     * @param actSpecLink
+     */
+    @ResponseBody
+    @PostMapping("/{actCode}/actSpecLink/save")
+    public ActResponse saveSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
+        return actModuleService.saveSpecLink(actCode, actSpecLink);
+    }
+
+    /**
+     * 特殊链接的删除
+     *
+     * @param actCode
+     * @param actSpecLink
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/{actCode}/actSpecLink/delete")
+    public ActResponse deleteSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
+        return actModuleService.deleteSpecLink(actCode, actSpecLink);
     }
 
 }

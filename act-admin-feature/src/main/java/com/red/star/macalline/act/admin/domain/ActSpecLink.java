@@ -6,6 +6,7 @@ import lombok.Data;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,11 +26,11 @@ public class ActSpecLink implements Serializable {
 
     // 创建时间
     @Column(name = "create_time")
-    private Timestamp createTime;
+    private Date createTime;
 
     // 更新时间
     @Column(name = "update_time")
-    private Timestamp updateTime;
+    private Date updateTime;
 
     /** 链接CODE */
     private String specCode;

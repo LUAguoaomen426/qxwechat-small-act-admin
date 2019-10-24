@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.red.star.macalline.act.admin.constant.CacheConstant;
 import com.red.star.macalline.act.admin.constant.RabbitConstant;
 import com.red.star.macalline.act.admin.domain.ActModule;
+import com.red.star.macalline.act.admin.domain.ActSpecLink;
 import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.exception.EntityExistException;
 import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
+import com.red.star.macalline.act.admin.mapper.ActSpecLinkMybatisMapper;
 import com.red.star.macalline.act.admin.mapper.MallMybatisMapper;
 import com.red.star.macalline.act.admin.rabbitmq.RabbitForwardService;
 import com.red.star.macalline.act.admin.repository.ActModuleRepository;
@@ -30,10 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author AMGuo
@@ -63,6 +62,9 @@ public class ActModuleServiceImpl implements ActModuleService {
 
     @Resource
     private RabbitForwardService rabbitForwardService;
+
+    @Resource
+    private ActSpecLinkMybatisMapper actSpecLinkMybatisMapper;
 
     @Override
     public Map<String, Object> queryAll(ActModuleQueryCriteria criteria, Pageable pageable) {
@@ -256,5 +258,167 @@ public class ActModuleServiceImpl implements ActModuleService {
         return ActResponse.buildSuccessResponse();
     }
 
+    /**
+     * 通过活动信息查询当前活动下的所有特殊链接信息
+     *
+     * @param actCode
+     * @return
+     */
+    @Override
+    public ActResponse findSpecLink(String actCode) {
+        String res = mallService.checkActCode(actCode);
+        if (!"SUCCESS".equals(res)) {
+            return ActResponse.buildErrorResponse(res);
+        }
+        List<ActSpecLink> actSpecLinks = actSpecLinkMybatisMapper.listFindSpecLinkByActCode(actCode);
+        actSpecLinks.forEach(actSpecLink -> actSpecLink.setHaveTL(ObjectUtils.isEmpty(actSpecLink.getTimeLimit()) ? "F" : "T"));
+        Collections.sort(actSpecLinks, new Comparator<ActSpecLink>() {
+            @Override
+            public int compare(ActSpecLink o1, ActSpecLink o2) {
+                if (null == o1.getSort()) {
+                    return 1;
+                }
+                if (null == o2.getSort()) {
+                    return -1;
+                }
+                if (o1.getSort() > o2.getSort()) {
+                    return 1;
+                }
+                if (o1.getSort().equals(o2.getSort())) {
+                    return 0;
+                }
+                return -1;
+            }
+        });
+
+        return ActResponse.buildSuccessResponse("specLinks", actSpecLinks);
+    }
+
+    /**
+     * 添加特殊链接信息
+     *
+     * @param actCode
+     * @param actSpecLink
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false)
+    public ActResponse addSpecLink(String actCode, ActSpecLink actSpecLink) {
+        String res = mallService.checkActCode(actCode);
+        if (!"SUCCESS".equals(res)) {
+            return ActResponse.buildErrorResponse(res);
+        }
+        if (ObjectUtils.isEmpty(actSpecLink)) {
+            return ActResponse.buildErrorResponse("参数有误");
+        }
+
+        Date now = new Date();
+        actSpecLink.setCreateTime(now);
+        actSpecLink.setUpdateTime(now);
+
+        Integer maxSort = actSpecLinkMybatisMapper.selectMaxSort("");
+        maxSort = ObjectUtils.isEmpty(maxSort) ? 0 : maxSort;
+        actSpecLink.setSort(maxSort + 1);
+        if (actSpecLink.getType().equals(0)) {
+            actSpecLink.setShowImage(removeImageWatermark(actSpecLink.getShowImage()));
+        } else {
+            //特殊链接不需要图片
+            actSpecLink.setShowImage(null);
+        }
+        if (!"T".equals(actSpecLink.getHaveTL())) {
+            //不需要时间限制
+            actSpecLink.setTimeLimit(null);
+        }
+
+        int i = actSpecLinkMybatisMapper.insert(actSpecLink);
+        //更新关联的act_mall_sepc__merge表
+        //查询出所有商场信息
+        List<Mall> malls = mallMybatisMapper.selectList(null);
+        malls.stream().forEach(m -> m.setLinkShow(false));
+        actSpecLinkMybatisMapper.insertSpecLinkMergeByList(actCode, actSpecLink.getSpecCode(), malls);
+
+        //清理缓存
+        for (Mall m : mallMybatisMapper.selectList(null))
+            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK_ALLOWED_MALL);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_DEFAULT_MALL + actSpecLink.getSpecCode());
+
+        return ActResponse.buildSuccessResponse("SUCCESS");
+    }
+
+    /**
+     * 特殊链接修改
+     *
+     * @param actCode
+     * @param actSpecLink
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false)
+    public ActResponse saveSpecLink(String actCode, ActSpecLink actSpecLink) {
+
+        String res = mallService.checkActCode(actCode);
+        if (!"SUCCESS".equals(res)) {
+            return ActResponse.buildErrorResponse(res);
+        }
+        if (ObjectUtils.isEmpty(actSpecLink)) {
+            return ActResponse.buildErrorResponse("参数有误");
+        }
+        actSpecLink.setShowImage(removeImageWatermark(actSpecLink.getShowImage()));
+        ActSpecLink oldInfo = actSpecLinkMybatisMapper.selectOne(new QueryWrapper<ActSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
+
+        if (actSpecLink.getType().equals(1)) {
+            //当前为特殊链接，不存储图片
+            actSpecLink.setShowImage(null);
+        }
+        if (!"T".equals(actSpecLink.getHaveTL())) {
+            actSpecLink.setTimeLimit(null);
+        }
+        if (actSpecLink.getMallList().size() > 0) {
+            actSpecLinkMybatisMapper.updateSpecLinkMergerByList(actCode, actSpecLink.getSpecCode(), actSpecLink.getMallList());
+        }
+        if ((!ObjectUtils.isEmpty(actSpecLink.getTimeLimit()) && !actSpecLink.getTimeLimit().equals(oldInfo.getTimeLimit())) || !oldInfo.getName().equals(actSpecLink.getName()) || !oldInfo.getUrl().equals(actSpecLink.getUrl()) || (!ObjectUtils.isEmpty(actSpecLink.getShowImage()) && !actSpecLink.getShowImage().equals(oldInfo.getShowImage()))) {
+            //修改了名称或者url，需要清除所有缓存
+            actSpecLinkMybatisMapper.update(actSpecLink, new UpdateWrapper<ActSpecLink>().eq("spec_code",actSpecLink.getSpecCode()));
+
+            for (Mall m : mallMybatisMapper.selectList(null))
+                redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
+            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK_ALLOWED_MALL);
+            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_DEFAULT_MALL + actSpecLink.getSpecCode());
+            return ActResponse.buildSuccessResponse("SUCCESS");
+        }
+        //清除部分修改的缓存信息
+        for (Mall m : actSpecLink.getMallList()) {
+            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
+        }
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK_ALLOWED_MALL);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_DEFAULT_MALL + actSpecLink.getSpecCode());
+        return ActResponse.buildSuccessResponse("SUCCESS");
+    }
+
+    /**
+     * 特殊链接删除
+     *
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false)
+    public ActResponse deleteSpecLink(String actCode, ActSpecLink actSpecLink) {
+        String res = mallService.checkActCode(actCode);
+        if (!"SUCCESS".equals(res)) {
+            return ActResponse.buildErrorResponse(res);
+        }
+        if (ObjectUtils.isEmpty(actSpecLink)) {
+            return ActResponse.buildErrorResponse("参数有误");
+        }
+        actSpecLinkMybatisMapper.delete(new QueryWrapper<ActSpecLink>().eq("spec_code",actSpecLink.getSpecCode()));
+        actSpecLinkMybatisMapper.deleteSpecLinkMergerByList(actCode, actSpecLink.getSpecCode());
+
+        for (Mall m : mallMybatisMapper.selectList(null))
+            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK_ALLOWED_MALL);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_DEFAULT_MALL + actSpecLink.getSpecCode());
+        return ActResponse.buildSuccessResponse();
+    }
 
 }
