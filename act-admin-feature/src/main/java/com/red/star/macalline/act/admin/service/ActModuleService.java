@@ -2,6 +2,7 @@ package com.red.star.macalline.act.admin.service;
 
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
+import com.red.star.macalline.act.admin.domain.vo.ActExtraNumber;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.dto.ActModuleDTO;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
@@ -91,4 +92,10 @@ public interface ActModuleService {
     ActResponse saveSpecLink(String actCode, ActSpecLink actSpecLink);
 
     ActResponse deleteSpecLink(String actCode, ActSpecLink actSpecLink);
+
+    ActResponse number(String source);
+
+    void addGroupNumber(String source, Integer addGroupNumber);
+
+    void changeTicketNumber(String source, ActExtraNumber actExtraNumber);
 }

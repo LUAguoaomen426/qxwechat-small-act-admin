@@ -245,5 +245,49 @@ public class WxInfoUtil {
         return resp;
     }
 
+    /**
+     * 团单品券信息(列表)
+     *
+     * @param unitCode
+     * @param groupId
+     * @param actId
+     * @param type      0 单品券  1 免费券
+     * @param groupList 团Id集合 以,分割，返回的对象中会多出img_arr ,生成的缓存为groupId -1
+     * @return
+     * @throws IOException
+     */
+    public static JSONObject getGroupListV2(String unitCode, String groupId, String actId, Integer type, String groupList) {
+
+        String typeStr = ObjectUtils.isEmpty(type) ? "0" : String.valueOf(type);
+        Map<String, String> param = new HashMap<String, String>();
+        String sign = SignUtil.fetchSign(param);
+        param.put("unit_code", unitCode);
+        param.put("group_id", groupId);
+        param.put("act_id", actId);
+        param.put("type", typeStr);
+        if (!ObjectUtils.isEmpty(groupList)) {
+            param.put("group_list", groupList);
+        }
+        Request request = Request.Post(SysParam.MACALLINE_URL + "activity/GetGroupListV2");
+        request.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.setHeader("redstar-call-app-id", SysParam.MACALLINE_APP_ID);
+        request.setHeader("redstar-sign", sign);
+        String resp = "";
+        try {
+            resp = HttpUtil.fetch(request, param);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+            e.printStackTrace();
+        }
+        LOGGER.info(Constant.MSG_INFO_GETGROUPLIST, JSONObject.toJSONString(param), "");
+        if (!ObjectUtils.isEmpty(resp)) {
+            JSONObject jsonObject = JSONObject.parseObject(resp);
+            if (!ObjectUtils.isEmpty(jsonObject)) {
+                return jsonObject.getJSONObject("dataMap");
+            }
+        }
+        return null;
+    }
+
 
 }

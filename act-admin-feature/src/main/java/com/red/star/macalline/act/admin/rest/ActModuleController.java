@@ -3,6 +3,7 @@ package com.red.star.macalline.act.admin.rest;
 import com.red.star.macalline.act.admin.aop.log.Log;
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
+import com.red.star.macalline.act.admin.domain.vo.ActExtraNumber;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
@@ -15,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -165,6 +168,40 @@ public class ActModuleController {
     @PostMapping("/{actCode}/actSpecLink/delete")
     public ActResponse deleteSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
         return actModuleService.deleteSpecLink(actCode, actSpecLink);
+    }
+
+    /**
+     * 参团/单品券人数管理
+     *
+     * @return
+     */
+    @RequestMapping("/number")
+    public ActResponse number(String source) {
+        return actModuleService.number(source);
+    }
+
+    /**
+     * 添加额外人数
+     *
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/addGroupNumber")
+    public ActResponse addGroupNumber(String source, Integer addGroupNumber) {
+        actModuleService.addGroupNumber(source, addGroupNumber);
+        return ActResponse.buildSuccessResponse();
+    }
+
+    /**
+     * 添加额外人数
+     *
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/addTicketNumber")
+    public ActResponse addTicketNumber(String source, ActExtraNumber actExtraNumber) throws IOException {
+        actModuleService.changeTicketNumber(source, actExtraNumber);
+        return ActResponse.buildSuccessResponse();
     }
 
 }

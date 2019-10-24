@@ -16,8 +16,10 @@ import com.red.star.macalline.act.admin.domain.bo.HomeSingleBo;
 import com.red.star.macalline.act.admin.domain.bo.PromotionTicketBo;
 import com.red.star.macalline.act.admin.domain.dto.BoostAwardDTO;
 import com.red.star.macalline.act.admin.domain.dto.TicketInfoDTO;
+import com.red.star.macalline.act.admin.domain.vo.ActGroupTicketV2;
 import com.red.star.macalline.act.admin.util.BeanUtil;
 import com.red.star.macalline.act.admin.util.JsonUtil;
+import com.red.star.macalline.act.admin.util.PriceUtil;
 import com.red.star.macalline.act.admin.util.WxInfoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,7 @@ import org.springframework.util.StopWatch;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -623,5 +626,96 @@ public class ComService {
         sw.stop();
         LOGGER.info(sw.toString());
     }
+
+    /**
+     * 获取券列表
+     * --单个团获取
+     *
+     * @param omsCode
+     * @param source
+     * @param groupId
+     * @return
+     */
+    public List<ActGroupTicketV2> getGroupTickets(String omsCode, String source, String groupId) {
+        return getGroupTickets(omsCode, source, groupId, null);
+    }
+
+    /**
+     * 获取券列表
+     * --批量团获取
+     *
+     * @param omsCode
+     * @param source
+     * @param groupId
+     * @param groupList 团Id集合 返回的对象中会多出img_arr,生成的缓存为groupId -1
+     * @return
+     */
+    public List<ActGroupTicketV2> getGroupTickets(String omsCode, String source, String groupId, List<Integer> groupList) {
+        Act act = ActFactory.create(source);
+        String actId = act.getPosterId();
+        String actKey = ActConstant.IMP_WX + actId + ActConstant.ACT_GROUP + omsCode;
+        String groupIds = null;
+        if (!ObjectUtils.isEmpty(groupList)) {
+            groupId = "-1";
+            StringBuilder builder = new StringBuilder();
+            builder.append(groupList.get(0));
+            for (int i = 1; i < groupList.size(); i++) {
+                builder.append(",").append(groupList.get(i));
+            }
+            groupIds = builder.toString();
+        }
+        String result = (String) redisTemplate.opsForHash().get(actKey, groupId);
+        List<ActGroupTicketV2> actGroupTicketV2s = new ArrayList<>();
+        JSONObject actList;
+        if (ObjectUtils.isEmpty(result)) {
+            actList = WxInfoUtil.getGroupListV2(omsCode, groupId, actId, null, groupIds);
+        } else {
+            actList = JSONObject.parseObject(result);
+        }
+
+        if (!ObjectUtils.isEmpty(actList)) {
+            String dataMap = actList.getString("single");
+            if (!ObjectUtils.isEmpty(dataMap)) {
+                actGroupTicketV2s = JSONObject.parseArray(dataMap, ActGroupTicketV2.class);
+            }
+        }
+        for (ActGroupTicketV2 actGroupTicketV2 : actGroupTicketV2s) {
+            //转换价格
+            actGroupTicketV2.setViewListPrice(PriceUtil.formatPrice(actGroupTicketV2.getListPrice() + ""));
+            actGroupTicketV2.setViewVipPrice(PriceUtil.formatPrice(actGroupTicketV2.getVipPrice() + ""));
+            actGroupTicketV2.setViewRetailPrice(PriceUtil.formatPrice(actGroupTicketV2.getRetailPrice() + ""));
+            //设置参团人数
+            actGroupTicketV2.setGroupNumber(getGroupNumber(String.valueOf(actGroupTicketV2.getSingleTicketId()), source));
+        }
+
+        return actGroupTicketV2s;
+    }
+
+    /**
+     * 获取参团人数
+     *
+     * @param ticketId
+     * @param source
+     * @return
+     */
+    public int getGroupNumber(String ticketId, String source) {
+        String trnKey = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_T_R_N;
+        String realField = ticketId.toString();
+        String realNumber = (String) redisTemplate.opsForHash().get(trnKey, realField);
+        String tsnKey = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_T_S_N;
+        String shameField = ticketId.toString();
+        String shameNumber = (String) redisTemplate.opsForHash().get(tsnKey, shameField);
+        int realNum = 0;
+        int shameNum = 0;
+        if (!ObjectUtils.isEmpty(realNumber)) {
+            realNum = Integer.parseInt(realNumber);
+        }
+        if (!ObjectUtils.isEmpty(shameNumber)) {
+            shameNum = Integer.parseInt(shameNumber);
+        }
+        return realNum + shameNum;
+    }
+
+
 }
 

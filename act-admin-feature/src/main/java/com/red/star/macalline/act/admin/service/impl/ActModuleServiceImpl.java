@@ -1,12 +1,20 @@
 package com.red.star.macalline.act.admin.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.red.star.macalline.act.admin.constant.CacheConstant;
 import com.red.star.macalline.act.admin.constant.RabbitConstant;
+import com.red.star.macalline.act.admin.constant.RedisConstant;
+import com.red.star.macalline.act.admin.core.act.Act;
+import com.red.star.macalline.act.admin.core.act.ActFactory;
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
 import com.red.star.macalline.act.admin.domain.Mall;
+import com.red.star.macalline.act.admin.domain.vo.ActExtraNumber;
+import com.red.star.macalline.act.admin.domain.vo.ActGroupTicketV2;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.exception.EntityExistException;
 import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
@@ -15,6 +23,7 @@ import com.red.star.macalline.act.admin.mapper.MallMybatisMapper;
 import com.red.star.macalline.act.admin.rabbitmq.RabbitForwardService;
 import com.red.star.macalline.act.admin.repository.ActModuleRepository;
 import com.red.star.macalline.act.admin.service.ActModuleService;
+import com.red.star.macalline.act.admin.service.ComService;
 import com.red.star.macalline.act.admin.service.MallService;
 import com.red.star.macalline.act.admin.service.dto.ActModuleDTO;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
@@ -22,6 +31,8 @@ import com.red.star.macalline.act.admin.service.mapper.ActModuleMapper;
 import com.red.star.macalline.act.admin.utils.PageUtil;
 import com.red.star.macalline.act.admin.utils.QueryHelp;
 import com.red.star.macalline.act.admin.utils.ValidationUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,8 +41,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StopWatch;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -65,6 +78,11 @@ public class ActModuleServiceImpl implements ActModuleService {
 
     @Resource
     private ActSpecLinkMybatisMapper actSpecLinkMybatisMapper;
+
+    @Resource
+    private ComService comService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActModuleServiceImpl.class);
 
     @Override
     public Map<String, Object> queryAll(ActModuleQueryCriteria criteria, Pageable pageable) {
@@ -379,7 +397,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         }
         if ((!ObjectUtils.isEmpty(actSpecLink.getTimeLimit()) && !actSpecLink.getTimeLimit().equals(oldInfo.getTimeLimit())) || !oldInfo.getName().equals(actSpecLink.getName()) || !oldInfo.getUrl().equals(actSpecLink.getUrl()) || (!ObjectUtils.isEmpty(actSpecLink.getShowImage()) && !actSpecLink.getShowImage().equals(oldInfo.getShowImage()))) {
             //修改了名称或者url，需要清除所有缓存
-            actSpecLinkMybatisMapper.update(actSpecLink, new UpdateWrapper<ActSpecLink>().eq("spec_code",actSpecLink.getSpecCode()));
+            actSpecLinkMybatisMapper.update(actSpecLink, new UpdateWrapper<ActSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
 
             for (Mall m : mallMybatisMapper.selectList(null))
                 redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
@@ -411,7 +429,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         if (ObjectUtils.isEmpty(actSpecLink)) {
             return ActResponse.buildErrorResponse("参数有误");
         }
-        actSpecLinkMybatisMapper.delete(new QueryWrapper<ActSpecLink>().eq("spec_code",actSpecLink.getSpecCode()));
+        actSpecLinkMybatisMapper.delete(new QueryWrapper<ActSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
         actSpecLinkMybatisMapper.deleteSpecLinkMergerByList(actCode, actSpecLink.getSpecCode());
 
         for (Mall m : mallMybatisMapper.selectList(null))
@@ -420,5 +438,145 @@ public class ActModuleServiceImpl implements ActModuleService {
         redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_DEFAULT_MALL + actSpecLink.getSpecCode());
         return ActResponse.buildSuccessResponse();
     }
+
+    @Override
+    public ActResponse number(String source) {
+        Map<String, Object> result = Maps.newHashMap();
+        //菜单名称
+        result.put("menuName", "数据报表");
+        Integer groupNumber = findGroupNumber(source);
+        Integer extraNumber = findExtraNumber(source);
+        if (ObjectUtils.isEmpty(extraNumber)) {
+            extraNumber = 0;
+        }
+        if (ObjectUtils.isEmpty(groupNumber)) {
+            groupNumber = 0;
+        }
+        result.put("extraNumber", extraNumber);
+        result.put("groupNumber", groupNumber);
+        result.put("totalNumber", groupNumber + extraNumber);
+        return ActResponse.buildSuccessResponse(result);
+    }
+
+
+    @Override
+    public void addGroupNumber(String source, Integer addGroupNumber) {
+        String key = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_EXTRA_NUMBER;
+        if (!redisTemplate.hasKey(key)) {
+            redisTemplate.opsForValue().set(key, 0, -1);
+        }
+        Integer extraNumber = Integer.parseInt((String) redisTemplate.opsForValue().get(key));
+        redisTemplate.opsForValue().set(key, extraNumber + addGroupNumber, -1);
+    }
+
+    @Override
+    public void changeTicketNumber(String source, ActExtraNumber actExtraNumber) {
+        StopWatch sw = new StopWatch();
+        sw.start("两天活动购买人数添加");
+
+        //先查表里所有的商场omsCode
+        List<Mall> mallList = mallService.listMallByAct(source);
+        List<Integer> groupIdArray = groupIdArray(source);
+        HashMap<String, String> res = new HashMap<>();
+        String tsnKey = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_T_S_N;
+        for (Mall mall : mallList) {
+            //遍历该商场的所有团
+            for (int i = 0; i < groupIdArray.size(); i++) {
+                Integer groupId = groupIdArray.get(i);
+                List<ActGroupTicketV2> tickets = comService.getGroupTickets(mall.getOmsCode(), source, groupId.toString());
+                if (!ObjectUtils.isEmpty(tickets)) {
+                    //每个券Id取出
+                    for (ActGroupTicketV2 actTicket : tickets) {
+                        Integer ticketId = actTicket.getSingleTicketId();
+                        Integer extraNumber = addTicketNumberV2(actTicket, actExtraNumber);
+                        String shameNumber = (String) redisTemplate.opsForHash().get(tsnKey, ticketId.toString());
+                        if (!ObjectUtils.isEmpty(shameNumber)) {
+                            extraNumber += Integer.valueOf(shameNumber);
+                        }
+                        res.put(ticketId.toString(), extraNumber.toString());
+                    }
+                }
+            }
+        }
+        redisTemplate.opsForHash().put(tsnKey, res, RedisConstant.TOKEN_EXPIRY_JUNE);
+
+        sw.stop();
+        LOGGER.info(sw.toString());
+    }
+
+    /**
+     * 根据不同价格添加单品券人数
+     *
+     * @return
+     */
+    public Integer addTicketNumberV2(ActGroupTicketV2 actTicket, ActExtraNumber actExtraNumber) {
+        BigDecimal a = new BigDecimal(actExtraNumber.getMinPrice());
+        BigDecimal b = new BigDecimal(actExtraNumber.getMaxPrice());
+        BigDecimal price = actTicket.getVipPrice();
+//        BigDecimal price = new BigDecimal("2000.00");
+        Integer extraNumber = 0;
+        if (!ObjectUtils.isEmpty(price)) {
+            if (price.compareTo(a) < 0) {
+                extraNumber = countNumber(actExtraNumber.getLowMinNumber(), actExtraNumber.getLowMaxNumber());
+            } else if (price.compareTo(a) >= 0 && price.compareTo(b) <= 0) {
+                extraNumber = countNumber(actExtraNumber.getMidMinNumber(), actExtraNumber.getMidMaxNumber());
+            } else if (price.compareTo(b) > 0) {
+                extraNumber = countNumber(actExtraNumber.getHighMinNumber(), actExtraNumber.getHighMaxNumber());
+            }
+        }
+        return extraNumber;
+    }
+
+    /**
+     * 随机生成a-b之间的一个数字
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public Integer countNumber(Integer a, Integer b) {
+        Integer i = new Random().nextInt((b - a) + 1) + a;
+        return i;
+    }
+
+    private List<Integer> groupIdArray(String source) {
+        Act act = ActFactory.create(source);
+        JSONArray jsonArray = (JSONArray) act.getConfig("GROUP_ID_LIST");
+        if (ObjectUtils.isEmpty(jsonArray)) {
+            return Lists.newArrayList(1, 2, 3, 4, 5, 6);
+        }
+        return jsonArray.toJavaList(Integer.class);
+    }
+
+    /**
+     * 查真实参团人数
+     *
+     * @param source
+     * @return
+     */
+    public Integer findGroupNumber(String source) {
+        String key = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_GROUP_NUMBER;
+        if (!redisTemplate.hasKey(key)) {
+            redisTemplate.opsForValue().set(key, 200, -1);
+        }
+        Integer extraNumber = Integer.parseInt((String) redisTemplate.opsForValue().get(key));
+        return extraNumber;
+    }
+
+    /**
+     * 查添加参团人数
+     *
+     * @param source
+     * @return
+     */
+    public Integer findExtraNumber(String source) {
+        String key = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_EXTRA_NUMBER;
+        if (!redisTemplate.hasKey(key)) {
+            redisTemplate.opsForValue().set(key, 0, -1);
+        }
+        Integer extraNumber = Integer.parseInt((String) redisTemplate.opsForValue().get(key));
+        return extraNumber;
+    }
+
 
 }
