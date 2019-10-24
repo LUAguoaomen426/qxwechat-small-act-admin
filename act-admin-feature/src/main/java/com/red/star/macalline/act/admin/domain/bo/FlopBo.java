@@ -1,4 +1,4 @@
-package com.red.star.macalline.act.admin.domain.vo;
+package com.red.star.macalline.act.admin.domain.bo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
