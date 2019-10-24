@@ -3,8 +3,10 @@ package com.red.star.macalline.act.admin.rest;
 import com.red.star.macalline.act.admin.aop.log.Log;
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
+import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
 import com.red.star.macalline.act.admin.domain.vo.ActExtraNumber;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
+import com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo;
 import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
 import io.swagger.annotations.Api;
@@ -14,12 +16,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.xml.ws.Response;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author AMGuo
@@ -202,6 +213,42 @@ public class ActModuleController {
     public ActResponse addTicketNumber(String source, ActExtraNumber actExtraNumber) throws IOException {
         actModuleService.changeTicketNumber(source, actExtraNumber);
         return ActResponse.buildSuccessResponse();
+    }
+
+    /**
+     * 获取每个团的打卡次数
+     *
+     * @param source
+     * @return
+     */
+    @RequestMapping("/findGroupCountBySource")
+    @ResponseBody
+    public ActResponse<List<Map>> findGroupCountBySource(String source) {
+        if (ObjectUtils.isEmpty(source)) {
+            return ActResponse.buildParamEmptyError("source");
+        }
+        List<Map> actGroupVO = actModuleService.findGroupCountBySource(source);
+        return ActResponse.buildSuccessResponse(actGroupVO);
+    }
+
+    @RequestMapping("findAllActNameAndSource")
+    @ResponseBody
+    public ActResponse<List> findAllActNameAndSource() {
+        List<Map<String, String>> allActNameAndSource = actModuleService.findAllActNameAndSource();
+        return ActResponse.buildSuccessResponse(allActNameAndSource);
+    }
+
+    /**
+     * 活动pv、uv
+     *
+     * @param sourcePvUvBo
+     * @return
+     */
+    @ResponseBody
+    @PostMapping(value = "/analysisPVUVData")
+    public ActResponse<SourcePvUvVo> analysisPVUVData(@RequestBody @Valid SourcePvUvBo sourcePvUvBo) {
+        List<SourcePvUvVo> list = actModuleService.analysisPVUVData(sourcePvUvBo);
+        return ActResponse.buildSuccessResponse(list);
     }
 
 }

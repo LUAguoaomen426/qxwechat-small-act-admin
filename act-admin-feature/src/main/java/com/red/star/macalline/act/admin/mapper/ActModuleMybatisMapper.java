@@ -39,4 +39,5 @@ public interface ActModuleMybatisMapper extends BaseMapper<ActModule> {
      * @return
      */
     ActModule findNextLevelInfo(@Param("level") Integer level, @Param("isDown") Boolean isDown);
+
 }

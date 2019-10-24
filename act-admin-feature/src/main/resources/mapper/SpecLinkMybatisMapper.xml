@@ -65,4 +65,6 @@
         where act_code = #{actCode}
         and spec_code = #{specCode}
     </delete>
+
+
 </mapper>

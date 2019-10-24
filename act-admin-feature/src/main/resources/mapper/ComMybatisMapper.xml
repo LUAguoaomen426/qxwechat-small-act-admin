@@ -3,7 +3,7 @@
 <mapper namespace="com.red.star.macalline.act.admin.mapper.ComMybatisMapper">
 
 
-    <select id="analysisFlopData" resultType="com.red.star.macalline.data.entity.act.vo.FlopVo">
+    <select id="analysisFlopData" resultType="com.red.star.macalline.act.admin.domain.vo.FlopVo">
         SELECT DATE_FORMAT(e.create_time, '%Y-%m-%d') AS date,
         count(1) totalNum,
         count(DISTINCT e.vip_id) peopleNum,
@@ -15,6 +15,37 @@
             AND #{flopBo.endTime}
         </if>
         GROUP BY DATE_FORMAT(e.create_time, '%Y-%m-%d');
+    </select>
+
+    <select id="findRecordByGroupIdAndSource" resultType="int">
+        SELECT
+        COUNT(1)
+        FROM
+        tb_wap_card_record
+        WHERE
+        group_id = #{groupId}
+        AND source = #{source}
+    </select>
+
+    <select id="analysisPVUV" resultType="com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo">
+        SELECT '总计'                      date,
+        count(1)                  pv,
+        count(DISTINCT t.open_id) uv
+        FROM tb_wap_record_view t
+        WHERE t.source = #{sourcePvUvBo.source};
+    </select>
+
+    <select id="analysisPVUVData" resultType="com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo">
+        SELECT DATE_FORMAT(t.create_time, '%Y-%m-%d') AS date,
+        count(1) pv,
+        count(DISTINCT t.open_id) uv
+        FROM tb_wap_record_view t
+        WHERE t.source = #{sourcePvUvBo.source}
+        <if test="sourcePvUvBo.startTime!=null and sourcePvUvBo.startTime!=''">AND t.create_time BETWEEN
+            #{sourcePvUvBo.startTime}
+            AND #{sourcePvUvBo.endTime}
+        </if>
+        GROUP BY DATE_FORMAT(t.create_time, '%Y-%m-%d');
     </select>
 
 </mapper>

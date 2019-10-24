@@ -1,5 +1,6 @@
 package com.red.star.macalline.act.admin.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -13,12 +14,15 @@ import com.red.star.macalline.act.admin.core.act.ActFactory;
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
 import com.red.star.macalline.act.admin.domain.Mall;
+import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
 import com.red.star.macalline.act.admin.domain.vo.ActExtraNumber;
 import com.red.star.macalline.act.admin.domain.vo.ActGroupTicketV2;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
+import com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo;
 import com.red.star.macalline.act.admin.exception.EntityExistException;
 import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
 import com.red.star.macalline.act.admin.mapper.ActSpecLinkMybatisMapper;
+import com.red.star.macalline.act.admin.mapper.ComMybatisMapper;
 import com.red.star.macalline.act.admin.mapper.MallMybatisMapper;
 import com.red.star.macalline.act.admin.rabbitmq.RabbitForwardService;
 import com.red.star.macalline.act.admin.repository.ActModuleRepository;
@@ -28,6 +32,8 @@ import com.red.star.macalline.act.admin.service.MallService;
 import com.red.star.macalline.act.admin.service.dto.ActModuleDTO;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
 import com.red.star.macalline.act.admin.service.mapper.ActModuleMapper;
+import com.red.star.macalline.act.admin.util.DateNewUtil;
+import com.red.star.macalline.act.admin.util.JsonUtil;
 import com.red.star.macalline.act.admin.utils.PageUtil;
 import com.red.star.macalline.act.admin.utils.QueryHelp;
 import com.red.star.macalline.act.admin.utils.ValidationUtil;
@@ -45,7 +51,9 @@ import org.springframework.util.StopWatch;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author AMGuo
@@ -78,6 +86,9 @@ public class ActModuleServiceImpl implements ActModuleService {
 
     @Resource
     private ActSpecLinkMybatisMapper actSpecLinkMybatisMapper;
+
+    @Resource
+    private ComMybatisMapper comMybatisMapper;
 
     @Resource
     private ComService comService;
@@ -502,6 +513,89 @@ public class ActModuleServiceImpl implements ActModuleService {
 
         sw.stop();
         LOGGER.info(sw.toString());
+    }
+
+    @Override
+    public List<Map> findGroupCountBySource(String source) {
+
+        List<Map> groupsCardingNum = new ArrayList<>();
+        Act act = ActFactory.create(source);
+        for (int i = 1; i < 7; i++) {
+            HashMap<String, Object> group = new HashMap<>();
+            String groupName = act.findNameByGroupId(i);
+            int count = comMybatisMapper.findRecordByGroupIdAndSource(i, source);
+            group.put("groupName", groupName);
+            group.put("count", count);
+            groupsCardingNum.add(group);
+        }
+        return groupsCardingNum;
+    }
+
+    @Override
+    public List<Map<String, String>> findAllActNameAndSource() {
+        ArrayList<Map<String, String>> res = new ArrayList<>();
+        ActModule queryCondition = new ActModule();
+        queryCondition.setSubType(1);
+        List<ActModule> actModules = actModuleMybatisMapper.selectList(new QueryWrapper<ActModule>().eq("sub_type",1));
+        for (ActModule actModule : actModules) {
+            HashMap<String, String> nameAndSource = new HashMap<>();
+            nameAndSource.put("label", actModule.getModuleName());
+            nameAndSource.put("value", actModule.getActCode());
+            res.add(nameAndSource);
+        }
+        return res;
+    }
+
+    /**
+     * 活动pv、uv
+     *
+     * @param sourcePvUvBo
+     * @return
+     */
+    public List<SourcePvUvVo> analysisPVUVData(SourcePvUvBo sourcePvUvBo) {
+        String key = CacheConstant.CACHE_KEY_PREFIX + sourcePvUvBo.getSource() + CacheConstant.CACHE_KEY_PVUV;
+        String s = (String)redisTemplate.opsForValue().get(key);
+        List<SourcePvUvVo> sourcePvUvVoList = Lists.newArrayList();
+        if (ObjectUtils.isEmpty(s) || sourcePvUvBo.isActualFlag()) {
+            SourcePvUvVo sourcePvUvVo = new SourcePvUvVo();
+            SourcePvUvBo sourcePvUvBo1 = new SourcePvUvBo(sourcePvUvBo.getSource());
+            SourcePvUvVo sourcePvUvVo1 = comMybatisMapper.analysisPVUV(sourcePvUvBo1);
+            sourcePvUvVoList.add(sourcePvUvVo1);
+            sourcePvUvVoList.add(sourcePvUvVo);
+            List<SourcePvUvVo> sourcePvUvVoData = comMybatisMapper.analysisPVUVData(sourcePvUvBo);
+            for (SourcePvUvVo entity : sourcePvUvVoData) {
+                sourcePvUvVo.setPv((ObjectUtils.isEmpty(entity.getPv()) ? 0 : entity.getPv()) + (ObjectUtils.isEmpty(sourcePvUvVo.getPv()) ? 0 : sourcePvUvVo.getPv()));
+                sourcePvUvVo.setUv((ObjectUtils.isEmpty(entity.getUv()) ? 0 : entity.getUv()) + (ObjectUtils.isEmpty(sourcePvUvVo.getUv()) ? 0 : sourcePvUvVo.getUv()));
+            }
+            sourcePvUvVo.setDate("日期总计");
+            sourcePvUvVoList.addAll(sourcePvUvVoData);
+            redisTemplate.opsForValue().set(key, JSON.toJSONString(sourcePvUvVoList), CacheConstant.DAY);
+        } else {
+            List<SourcePvUvVo> sourcePvUvVoList2 = Lists.newArrayList();
+            if (JsonUtil.isJSON(s)) {
+                sourcePvUvVoList = JSON.parseArray(s, SourcePvUvVo.class);
+                if (!ObjectUtils.isEmpty(sourcePvUvBo.getStartTime()) && !ObjectUtils.isEmpty(sourcePvUvBo.getEndTime())) {
+                    AtomicInteger i = new AtomicInteger();
+                    sourcePvUvVoList.forEach(e -> {
+                        i.getAndIncrement();
+                        if (i.get() > 2) {
+                            try {
+                                if (DateNewUtil.parseAnyString(e.getDate()).after(DateNewUtil.parseAnyString(sourcePvUvBo.getStartTime())) && DateNewUtil.parseAnyString(e.getDate()).before(DateNewUtil.parseAnyString(sourcePvUvBo.getEndTime()))) {
+                                    sourcePvUvVoList2.add(e);
+                                }
+                            } catch (ParseException ex) {
+                                ex.printStackTrace();
+                            }
+                        } else {
+                            sourcePvUvVoList2.add(e);
+                        }
+                    });
+
+                }
+            }
+            sourcePvUvVoList = sourcePvUvVoList2;
+        }
+        return sourcePvUvVoList;
     }
 
     /**

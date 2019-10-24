@@ -2,12 +2,17 @@ package com.red.star.macalline.act.admin.service;
 
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
+import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
 import com.red.star.macalline.act.admin.domain.vo.ActExtraNumber;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
+import com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo;
 import com.red.star.macalline.act.admin.service.dto.ActModuleDTO;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
 import org.springframework.data.domain.Pageable;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -98,4 +103,10 @@ public interface ActModuleService {
     void addGroupNumber(String source, Integer addGroupNumber);
 
     void changeTicketNumber(String source, ActExtraNumber actExtraNumber);
+
+    List<Map> findGroupCountBySource(String source);
+
+    List<Map<String,String>> findAllActNameAndSource();
+
+    List<SourcePvUvVo> analysisPVUVData(@Valid SourcePvUvBo sourcePvUvBo);
 }

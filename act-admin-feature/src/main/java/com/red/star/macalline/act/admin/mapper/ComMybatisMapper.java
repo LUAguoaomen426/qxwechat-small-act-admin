@@ -1,8 +1,10 @@
 package com.red.star.macalline.act.admin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.red.star.macalline.act.admin.domain.vo.FlopBo;
+import com.red.star.macalline.act.admin.domain.bo.FlopBo;
+import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
 import com.red.star.macalline.act.admin.domain.vo.FlopVo;
+import com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -24,4 +26,30 @@ public interface ComMybatisMapper extends BaseMapper {
      * @return
      */
     List<FlopVo> analysisFlopData(@Param("flopBo") FlopBo flopBo);
+
+    /**
+     * 根据团id和活动来源获取打卡次数
+     *
+     * @param groupId
+     * @param source
+     * @return
+     */
+    int findRecordByGroupIdAndSource(@Param("groupId") Integer groupId, @Param("source") String source);
+
+
+    /**
+     * 活动pv、uv（按时间分组）
+     *
+     * @param sourcePvUvBo
+     * @return
+     */
+    List<SourcePvUvVo> analysisPVUVData(@Param("sourcePvUvBo") SourcePvUvBo sourcePvUvBo);
+
+    /**
+     * 活动pv、uv
+     *
+     * @param sourcePvUvBo1
+     * @return
+     */
+    SourcePvUvVo analysisPVUV(@Param("sourcePvUvBo") SourcePvUvBo sourcePvUvBo1);
 }
