@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.red.star.macalline.act.admin.mapper.ComMybatisMapper">
+
+
+    <select id="analysisFlopData" resultType="com.red.star.macalline.data.entity.act.vo.FlopVo">
+        SELECT DATE_FORMAT(e.create_time, '%Y-%m-%d') AS date,
+        count(1) totalNum,
+        count(DISTINCT e.vip_id) peopleNum,
+        count(0 != e.ticket_id OR NULL) luckyNum
+        FROM tb_wap_event e
+        WHERE e.type = #{flopBo.type}
+        AND e.source = #{flopBo.source}
+        <if test="flopBo.startTime!=null and flopBo.startTime!=''">AND e.create_time BETWEEN #{flopBo.startTime}
+            AND #{flopBo.endTime}
+        </if>
+        GROUP BY DATE_FORMAT(e.create_time, '%Y-%m-%d');
+    </select>
+
+</mapper>
