@@ -66,20 +66,19 @@ public class ActModuleController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @Log("查询所有活动信息")
-    @ApiOperation(value = "查询所有活动信息")
-    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_LIST')")
-    @ResponseBody
-    @GetMapping(value = "/actInfo")
-    public ActResponse findActInfo() {
-        List<ActModule> actInfo = actModuleService.findActInfo();
-        return ActResponse.buildSuccessResponse("actsInfo", actInfo);
-    }
+//    @Log("查询所有活动信息")
+//    @ApiOperation(value = "查询所有活动信息")
+//    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_LIST')")
+//    @ResponseBody
+//    @GetMapping(value = "/actInfo")
+//    public ActResponse findActInfo() {
+//        List<ActModule> actInfo = actModuleService.findActInfo();
+//        return ActResponse.buildSuccessResponse("actsInfo", actInfo);
+//    }
 
     @Log("活动信息添加")
     @ApiOperation(value = "活动信息添加")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_CREATE')")
-    @ResponseBody
     @PostMapping(value = "/actInfo/add")
     public ActResponse addActInfo(@RequestBody ActModule actInfo) {
         ActResponse actResponse = actModuleService.addActInfo(actInfo);
@@ -89,7 +88,6 @@ public class ActModuleController {
     @Log("活动信息修改")
     @ApiOperation(value = "活动信息修改")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_UPDATE')")
-    @ResponseBody
     @PostMapping(value = "/actInfo/save")
     public ActResponse saveActInfo(@RequestBody ActModule actInfo) {
         ActResponse actResponse = actModuleService.saveActInfo(actInfo);
@@ -99,7 +97,6 @@ public class ActModuleController {
     @Log("当前活动优先级改变")
     @ApiOperation(value = "当前活动优先级改变")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_LEVEL_CHANGE')")
-    @ResponseBody
     @PostMapping("/actInfo/changeLevel")
     public ActResponse changeActInfoLevel(@RequestParam("actCode") String actCode, @RequestParam("isDown") Boolean isDown) {
         ActResponse actResponse = actModuleService.changActInfoLeveL(isDown, actCode);
@@ -109,7 +106,6 @@ public class ActModuleController {
     @Log("活动逻辑删除-下架")
     @ApiOperation(value = "活动逻辑删除-下架")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_PULL_OFF')")
-    @ResponseBody
     @PostMapping("/actInfo/delete")
     public ActResponse deleteAct(@RequestParam("actCode") String actCode) {
         ActResponse actResponse = actModuleService.deleteAct(actCode);
@@ -119,7 +115,6 @@ public class ActModuleController {
     @Log("活动启用-上架")
     @ApiOperation(value = "活动启用-上架")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_PULL_ON')")
-    @ResponseBody
     @PostMapping("actInfo/enable")
     public ActResponse enableAct(@RequestParam("actCode") String actCode) {
         ActResponse actResponse = actModuleService.enableAct(actCode);
@@ -129,7 +124,6 @@ public class ActModuleController {
     @Log("活动特殊链接上传")
     @ApiOperation(value = "活动特殊链接上传")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_ALL','ACT_SPEC_UPLOAD')")
-    @ResponseBody
     @PostMapping("/{actCode}/actSpeclink/upload")
     public ActResponse uploadActSpecLinkInfo(@PathVariable("actCode") String actCode, @RequestParam("specCode") String specCode, @RequestParam("file") MultipartFile file) {
         return actModuleService.uploadActSpecLinkInfo(actCode, specCode, file);
@@ -138,7 +132,6 @@ public class ActModuleController {
     @Log("活动特殊链接")
     @ApiOperation(value = "活动特殊链接")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_ALL','ACT_SPEC_LIST')")
-    @ResponseBody
     @GetMapping("/{actCode}/actSpecLink")
     public ActResponse findSpecLink(@PathVariable("actCode") String actCode) {
         ActResponse actResponse = actModuleService.findSpecLink(actCode);
@@ -148,7 +141,6 @@ public class ActModuleController {
     @Log("增加广告位")
     @ApiOperation(value = "增加广告位")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_ALL','ACT_SPEC_ADD')")
-    @ResponseBody
     @PostMapping("/{actCode}/actSpecLink/add")
     public ActResponse addSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
         ActResponse actResponse = actModuleService.addSpecLink(actCode, actSpecLink);
@@ -158,7 +150,6 @@ public class ActModuleController {
     @Log("增加广告位")
     @ApiOperation(value = "增加广告位")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_ALL','ACT_SPEC_UPDATE')")
-    @ResponseBody
     @PostMapping("/{actCode}/actSpecLink/save")
     public ActResponse saveSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
         return actModuleService.saveSpecLink(actCode, actSpecLink);
@@ -167,14 +158,12 @@ public class ActModuleController {
     @Log("删除广告位")
     @ApiOperation(value = "删除广告位")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_ALL','ACT_SPEC_DELETE')")
-    @ResponseBody
     @PostMapping("/{actCode}/actSpecLink/delete")
     public ActResponse deleteSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
         return actModuleService.deleteSpecLink(actCode, actSpecLink);
     }
 
     @RequestMapping("findAllActNameAndSource")
-    @ResponseBody
     public ActResponse<List> findAllActNameAndSource() {
         List<Map<String, String>> allActNameAndSource = actModuleService.findAllActNameAndSource();
         return ActResponse.buildSuccessResponse(allActNameAndSource);

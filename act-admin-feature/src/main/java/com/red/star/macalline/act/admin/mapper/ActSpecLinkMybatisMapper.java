@@ -21,7 +21,12 @@ public interface ActSpecLinkMybatisMapper extends BaseMapper<ActSpecLink> {
 
     List<ActSpecLink> listFindSpecLinkByActCode(String actCode);
 
-    void insertSpecLinkMergeByList(String actCode, String specCode, List<Mall> newMalls);
+    /**
+     * 传入specLinkId 以及mall来设置act_mall_spec_merge表信息
+     * @param actCode
+     * @param mallList
+     */
+    void insertSpecLinkMergeByList(@Param("actCode")String actCode,@Param("specCode")String specCode, @Param("mallList") List<Mall> mallList);
 
     /**
      * 根据actCode、specCode将isShow字段更改

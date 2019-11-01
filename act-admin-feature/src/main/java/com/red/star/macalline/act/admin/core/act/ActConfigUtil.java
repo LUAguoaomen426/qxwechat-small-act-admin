@@ -101,7 +101,7 @@ public class ActConfigUtil {
                 logger.error("posterId Convert error , posterId:{}", posterId);
                 return null;
             }
-            stringRedisTemplate.opsForValue().set(CacheConstant.CACHE_KEY_ACT_MODULE_POSTER_ID + posterId, source, CacheConstant.DAY * 31);
+            stringRedisTemplate.opsForValue().set(CacheConstant.CACHE_KEY_ACT_MODULE_POSTER_ID + posterId, source, CacheConstant.DAY * 31, TimeUnit.SECONDS);
         }
         return source;
     }
@@ -125,7 +125,7 @@ public class ActConfigUtil {
             if (!ObjectUtils.isEmpty(actModule)) {
                 ConfiguratedAct configuratedAct = new ConfiguratedAct(actModule);
                 String string = JSONObject.toJSONString(configuratedAct);
-                stringRedisTemplate.opsForValue().set(CacheConstant.CACHE_KEY_ACT_MODULE + key, string, CacheConstant.DAY * 31);
+                stringRedisTemplate.opsForValue().set(CacheConstant.CACHE_KEY_ACT_MODULE + key, string, CacheConstant.DAY * 31, TimeUnit.SECONDS);
                 act = configuratedAct;
             }
         }

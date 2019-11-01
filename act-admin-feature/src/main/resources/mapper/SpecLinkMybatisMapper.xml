@@ -10,29 +10,26 @@
         </collection>
     </resultMap>
     <select id="listFindSpecLinkByActCode" resultMap="findSepcLinkMap">
-        SELECT
-        sl.id,
-        sl.spec_code,
-        sl.`name`,
-        sl.url ,
-        sl.show_image,
-        sl.sort,
-        sl.type,
-        sl.time_limit,
-        wm.oms_code,
-        wm.mall_code,
-        wm.mall_name,
-        wm.province,
-        wm.city,
-        sm.is_show as link_show
-        FROM
-        tb_wap_act_spec_link AS sl,
-        tb_wap_act_mall_spec_merge AS sm ,
-        tb_wap_mall as wm
-        WHERE
-        sl.spec_code = sm.spec_code
-        and sm.oms_code = wm.oms_code
-        and sm.act_code =#{actCode}
+        SELECT sl.id,
+               sl.spec_code,
+               sl.`name`,
+               sl.url,
+               sl.show_image,
+               sl.sort,
+               sl.type,
+               sl.time_limit,
+               wm.oms_code,
+               wm.mall_code,
+               wm.mall_name,
+               wm.province,
+               wm.city,
+               sm.is_show as link_show
+        FROM tb_wap_act_spec_link AS sl,
+             tb_wap_act_mall_spec_merge AS sm,
+             tb_wap_mall as wm
+        WHERE sl.spec_code = sm.spec_code
+          and sm.oms_code = wm.oms_code
+          and sm.act_code = #{actCode}
         order by wm.province, wm.city, wm.oms_code
     </select>
 
@@ -47,7 +44,9 @@
     </insert>
 
     <select id="selectMaxSort" resultType="java.lang.Integer">
-        SELECT MAX(t.sort) FROM tb_wap_act_spec_link t WHERE t.spec_code != #{specCode}
+        SELECT MAX(t.sort)
+        FROM tb_wap_act_spec_link t
+        WHERE t.spec_code != #{specCode}
     </select>
 
     <update id="updateSpecLinkMergerByList">
@@ -66,5 +65,10 @@
         and spec_code = #{specCode}
     </delete>
 
-
+    <update id="updateSpecLinkMergerisShow">
+        update tb_wap_act_mall_spec_merge
+           set is_show = #{isShow}
+         where act_code = #{actCode}
+         and spec_code = #{specCode}
+    </update>
 </mapper>

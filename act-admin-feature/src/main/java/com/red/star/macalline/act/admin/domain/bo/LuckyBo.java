@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotBlank;
 
+import java.util.Date;
+
 /**
  * @ProjectName: qxwechat-small-act
  * @Package: com.red.star.macalline.act.entity.bo
@@ -61,12 +63,12 @@ public class LuckyBo {
     /**
      * 开始时间
      */
-    private String startTime;
+    private Date startTime;
 
     /**
      * 结束时间
      */
-    private String endTime;
+    private Date endTime;
 
     /**
      * 奖品级别

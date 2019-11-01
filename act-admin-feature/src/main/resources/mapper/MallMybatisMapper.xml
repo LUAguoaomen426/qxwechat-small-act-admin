@@ -22,7 +22,7 @@
         </foreach>
     </update>
 
-    <select id="findAllMallWithKeyOmsCode" resultType="com.red.star.macalline.act.admin.entity.MallMsgBO">
+    <select id="findAllMallWithKeyOmsCode" resultType="com.red.star.macalline.act.admin.domain.Mall">
         SELECT
         id,
         oms_code,

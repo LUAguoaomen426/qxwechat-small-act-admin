@@ -2,6 +2,9 @@ package com.red.star.macalline.act.admin.domain;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -17,12 +20,14 @@ import java.util.Date;
 @Entity
 @Data
 @Table(name = "tb_wap_act_module")
+@TableName(value = "tb_wap_act_module")
 public class ActModule implements Serializable {
 
     // 主键ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @TableId(type = IdType.AUTO)
     private Integer id;
 
     // 活动code

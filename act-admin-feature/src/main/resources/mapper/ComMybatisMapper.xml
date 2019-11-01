@@ -11,7 +11,7 @@
         FROM tb_wap_event e
         WHERE e.type = #{flopBo.type}
         AND e.source = #{flopBo.source}
-        <if test="flopBo.startTime!=null and flopBo.startTime!=''">AND e.create_time BETWEEN #{flopBo.startTime}
+        <if test="flopBo.startTime!=null">AND e.create_time BETWEEN #{flopBo.startTime}
             AND #{flopBo.endTime}
         </if>
         GROUP BY DATE_FORMAT(e.create_time, '%Y-%m-%d');
@@ -41,7 +41,7 @@
         count(DISTINCT t.open_id) uv
         FROM tb_wap_record_view t
         WHERE t.source = #{sourcePvUvBo.source}
-        <if test="sourcePvUvBo.startTime!=null and sourcePvUvBo.startTime!=''">AND t.create_time BETWEEN
+        <if test="sourcePvUvBo.startTime!=null">AND t.create_time BETWEEN
             #{sourcePvUvBo.startTime}
             AND #{sourcePvUvBo.endTime}
         </if>
@@ -78,7 +78,7 @@
         <if test="luckyBo.grade!=null and luckyBo.grade!=0">
             AND e.ticket_grade = #{luckyBo.grade}
         </if>
-        <if test="luckyBo.startTime!=null and luckyBo.startTime!=''">AND e.create_time BETWEEN #{luckyBo.startTime}
+        <if test="luckyBo.startTime!=null">AND e.create_time BETWEEN #{luckyBo.startTime}
             AND #{luckyBo.endTime}
         </if>
         AND e.ticket_get = 1

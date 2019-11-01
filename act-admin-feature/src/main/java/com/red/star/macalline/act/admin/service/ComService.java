@@ -427,19 +427,19 @@ public class ComService {
                     Integer singleTicketId = entityObject.getInteger("single_ticket_id");
                     BoostAwardDTO boostAwardDTO = new BoostAwardDTO(singleTicketId, itemName, null, null, "商场");
                     if (cashAmt.equals(300)) {
-                        stringRedisTemplate.opsForValue().set(awardKey1, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY);
+                        stringRedisTemplate.opsForValue().set(awardKey1, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY, TimeUnit.SECONDS);
                     } else if (cashAmt.equals(500)) {
-                        stringRedisTemplate.opsForValue().set(awardKey2, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY);
+                        stringRedisTemplate.opsForValue().set(awardKey2, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY, TimeUnit.SECONDS);
                     } else if (cashAmt.equals(1000)) {
-                        stringRedisTemplate.opsForValue().set(awardKey3, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY);
+                        stringRedisTemplate.opsForValue().set(awardKey3, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY, TimeUnit.SECONDS);
                     } else if (cashAmt.equals(2000)) {
-                        stringRedisTemplate.opsForValue().set(awardKey4, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY);
+                        stringRedisTemplate.opsForValue().set(awardKey4, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY, TimeUnit.SECONDS);
                     } else if (cashAmt.equals(5000)) {
-                        stringRedisTemplate.opsForValue().set(awardKey5, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY);
+                        stringRedisTemplate.opsForValue().set(awardKey5, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY, TimeUnit.SECONDS);
                     } else if (cashAmt.equals(10000)) {
-                        stringRedisTemplate.opsForValue().set(awardKey6, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY);
+                        stringRedisTemplate.opsForValue().set(awardKey6, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY, TimeUnit.SECONDS);
                     } else if (cashAmt.equals(49999)) {
-                        stringRedisTemplate.opsForValue().set(awardKey7, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY);
+                        stringRedisTemplate.opsForValue().set(awardKey7, JSON.toJSONString(boostAwardDTO), 31 * CacheConstant.DAY, TimeUnit.SECONDS);
                     }
                 });
             }
@@ -668,7 +668,7 @@ public class ComService {
             }
             groupIds = builder.toString();
         }
-        String result = (String) redisTemplate.opsForHash().get(actKey, groupId);
+        String result = (String) stringRedisTemplate.opsForHash().get(actKey, groupId);
         List<ActGroupTicketV2> actGroupTicketV2s = new ArrayList<>();
         JSONObject actList;
         if (ObjectUtils.isEmpty(result)) {
@@ -705,10 +705,10 @@ public class ComService {
     public int getGroupNumber(String ticketId, String source) {
         String trnKey = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_T_R_N;
         String realField = ticketId.toString();
-        String realNumber = (String) redisTemplate.opsForHash().get(trnKey, realField);
+        String realNumber = (String) stringRedisTemplate.opsForHash().get(trnKey, realField);
         String tsnKey = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_T_S_N;
         String shameField = ticketId.toString();
-        String shameNumber = (String) redisTemplate.opsForHash().get(tsnKey, shameField);
+        String shameNumber = (String) stringRedisTemplate.opsForHash().get(tsnKey, shameField);
         int realNum = 0;
         int shameNum = 0;
         if (!ObjectUtils.isEmpty(realNumber)) {
@@ -731,7 +731,7 @@ public class ComService {
             // 从数据库中获取商场
             result = mallMybatisMapper.listMallByAct(act);
             if (result != null && result.size() > 0) {
-                stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(result), CacheConstant.CACHE_EXPIRE_MALL_LIST);
+                stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(result), CacheConstant.CACHE_EXPIRE_MALL_LIST, TimeUnit.SECONDS);
             }
         }
         return result;

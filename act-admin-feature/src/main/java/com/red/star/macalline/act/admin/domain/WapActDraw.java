@@ -1,6 +1,9 @@
 package com.red.star.macalline.act.admin.domain;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -16,6 +19,7 @@ import java.util.Date;
  */
 @Data
 @Table(name = "tb_wap_act_draw")
+@TableName(value = "tb_wap_act_draw")
 public class WapActDraw implements Serializable {
 
 
@@ -23,6 +27,7 @@ public class WapActDraw implements Serializable {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ApiModelProperty(value = "id", example = "0")
+    @TableId(type = IdType.AUTO)
     private Integer id;
 
     /**

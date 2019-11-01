@@ -2,6 +2,7 @@ package com.red.star.macalline.act.admin.service;
 
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
+import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
 import com.red.star.macalline.act.admin.domain.vo.ActExtraNumber;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
@@ -141,7 +142,9 @@ public interface ActModuleService {
 
     List<Map> findGroupCountBySource(String source);
 
-    List<Map<String,String>> findAllActNameAndSource();
+    List<Map<String, String>> findAllActNameAndSource();
 
     List<SourcePvUvVo> analysisPVUVData(@Valid SourcePvUvBo sourcePvUvBo);
+
+    void clearSpecLink(String actCode, ActSpecLink actSpecLink);
 }

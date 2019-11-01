@@ -9,14 +9,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.red.star.macalline.act.admin.constant.CacheConstant;
 import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
 import com.red.star.macalline.act.admin.domain.Mall;
+import com.red.star.macalline.act.admin.domain.bo.MallMsgBO;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
-import com.red.star.macalline.act.admin.entity.MallMsgBO;
 import com.red.star.macalline.act.admin.exception.EntityExistException;
 import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
 import com.red.star.macalline.act.admin.mapper.ActSpecLinkMybatisMapper;
@@ -113,18 +112,44 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
         return mallMapper.toDto(mallRepository.save(resources));
     }
 
+    //        @Override
+//    @Transactional(rollbackFor = Exception.class)
+//    public void update(List<Mall> resources) {
+//        if (ObjectUtils.isEmpty(resources)) {
+//            return;
+//        }
+//        mallMybatisMapper.updateWapMall(resources);
+//        redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ENTRANCE);
+//        for (Mall mall : resources) {
+//            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_CODE + mall.getMallCode());
+//            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_OMS_CODE + mall.getOmsCode());
+//        }
+//        //清除大促缓存
+//        for (ActModule actModule :
+//                actModuleMybatisMapper.listEnableAct()) {
+//            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME + actModule.getActCode());
+//        }
+//    }
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void update(List<Mall> resources) {
-        if (ObjectUtils.isEmpty(resources)) {
-            return;
+    public void update(Mall resources) {
+        Optional<Mall> optionalTbWapMall = mallRepository.findById(resources.getId());
+        ValidationUtil.isNull(optionalTbWapMall, "Mall", "id", resources.getId());
+        Mall tbWapMall = optionalTbWapMall.get();
+        Mall tbWapMall1 = null;
+        tbWapMall1 = mallRepository.findByOmsCode(resources.getOmsCode());
+        if (tbWapMall1 != null && !tbWapMall1.getId().equals(tbWapMall.getId())) {
+            throw new EntityExistException(Mall.class, "oms_code", resources.getOmsCode());
         }
-        mallMybatisMapper.updateWapMall(resources);
+        tbWapMall1 = mallRepository.findByMallCode(resources.getMallCode());
+        if (tbWapMall1 != null && !tbWapMall1.getId().equals(tbWapMall.getId())) {
+            throw new EntityExistException(Mall.class, "mall_code", resources.getMallCode());
+        }
+        tbWapMall.copy(resources);
+        mallRepository.save(tbWapMall);
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ENTRANCE);
-        for (Mall mall : resources) {
-            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_CODE + mall.getMallCode());
-            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_OMS_CODE + mall.getOmsCode());
-        }
+        redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_CODE + tbWapMall.getMallCode());
+        redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_OMS_CODE + tbWapMall.getOmsCode());
         //清除大促缓存
         for (ActModule actModule :
                 actModuleMybatisMapper.listEnableAct()) {
@@ -271,7 +296,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
             mallMybatisMapper.updateActMallDefultEnableByCity(mall.getCity());
             mall.setDefaultEnable(true);
             UpdateWrapper<Mall> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq("omsCode", mall.getOmsCode());
+            updateWrapper.eq("oms_code", mall.getOmsCode());
             mallMybatisMapper.update(mall, updateWrapper);
             //刷新缓存
             redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_CITY_DEFAULT + mall.getCity());
@@ -279,8 +304,6 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
         }
         return ActResponse.buildErrorResponse("该城市最少需要一个默认商场");
     }
-
-
 
 
     /**

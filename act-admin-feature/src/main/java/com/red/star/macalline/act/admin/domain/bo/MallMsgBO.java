@@ -1,4 +1,4 @@
-package com.red.star.macalline.act.admin.entity;
+package com.red.star.macalline.act.admin.domain.bo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

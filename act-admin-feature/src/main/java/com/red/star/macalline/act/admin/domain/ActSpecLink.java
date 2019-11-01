@@ -1,5 +1,9 @@
 package com.red.star.macalline.act.admin.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -16,12 +20,14 @@ import java.util.List;
  */
 @Data
 @Table(name = "tb_wap_act_spec_link")
+@TableName(value = "tb_wap_act_spec_link")
 public class ActSpecLink implements Serializable {
 
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ApiModelProperty(value = "id", example = "0")
+    @TableId(type = IdType.AUTO)
     private Integer id;
 
     // 创建时间
@@ -46,19 +52,30 @@ public class ActSpecLink implements Serializable {
     private Integer type;
     /** 特殊链接对应的商场信息 */
     @Transient
+    @TableField(exist = false)
     private List<Mall> mallList;
+    @Transient
+    @TableField(exist = false)
+    private List<Mall> changeMallList;
     /** 在商场下是否展示此链接 */
     @Transient
+    @TableField(exist = false)
     private Boolean isShow;
     /** 1:上移 2:下移 3:置顶 4:置低 */
     @Transient
+    @TableField(exist = false)
     private Integer operate;
     /** 被迫移动的广告位 */
     @Transient
+    @TableField(exist = false)
     private String moveSpecCode;
     /** 广告位时间限制JSON格式 */
     private String timeLimit;
+    @Transient
+    @TableField(exist = false)
+    private List<String> time;
     /** 是否有时间限制 */
     @Transient
+    @TableField(exist = false)
     private String haveTL;
 }

@@ -1,5 +1,6 @@
 package com.red.star.macalline.act.admin.service.dto;
 
+import com.red.star.macalline.act.admin.annotation.Query;
 import lombok.Data;
 
 /**
@@ -8,4 +9,10 @@ import lombok.Data;
  */
 @Data
 public class MallQueryCriteria {
+
+    /**
+     * 多字段模糊
+     */
+    @Query(blurry = "omsCode,mallCode,mallName")
+    private String blurry;
 }

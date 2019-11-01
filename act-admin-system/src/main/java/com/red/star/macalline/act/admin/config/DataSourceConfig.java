@@ -96,4 +96,5 @@ public class DataSourceConfig {
     JpaTransactionManager transactionManager(EntityManagerFactoryBuilder builder) throws IOException {
         return new JpaTransactionManager(entityManagerFactory(builder).getObject());
     }
+
 }

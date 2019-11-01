@@ -2,6 +2,10 @@ package com.red.star.macalline.act.admin.domain;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +21,7 @@ import java.io.Serializable;
 @Entity
 @Data
 @Table(name = "tb_wap_mall")
+@TableName(value = "tb_wap_mall")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Mall implements Serializable {
@@ -25,6 +30,7 @@ public class Mall implements Serializable {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ApiModelProperty(value = "id", example = "0")
+    @TableId(type = IdType.AUTO)
     private Integer id;
 
     /**
@@ -52,12 +58,14 @@ public class Mall implements Serializable {
      * 商场所在省
      */
     @ApiModelProperty(value = "商场所在省")
+    @Column(name = "province")
     private String province;
 
     /**
      * 商场所在城市
      */
     @ApiModelProperty(value = "商场所在城市")
+    @Column(name = "city")
     private String city;
     /**
      * 商场详细地址
@@ -92,11 +100,13 @@ public class Mall implements Serializable {
      * 是否参与活动
      */
     @Transient
+    @TableField(exist = false)
     private Boolean isJoin;
     /**
      * 特殊链接是否展示,特殊链接->[商场]时使用
      */
     @Transient
+    @TableField(exist = false)
     private Boolean linkShow;
     /**
      * 是否瞄零

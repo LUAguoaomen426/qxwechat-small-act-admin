@@ -51,7 +51,7 @@ public class ReportController {
     @Log("参团/单品券人数管理")
     @ApiOperation(value = "参团/单品券人数管理")
     @PreAuthorize("hasAnyRole('ADMIN','REPORT_ALL','REPORT_ACT_GROUP_LIST')")
-    @RequestMapping("/number")
+    @GetMapping("/number")
     public ActResponse number(String source) {
         return actModuleService.number(source);
     }
@@ -59,7 +59,6 @@ public class ReportController {
     @Log("添加额外人数")
     @ApiOperation(value = "添加额外人数")
     @PreAuthorize("hasAnyRole('ADMIN','REPORT_ALL','REPORT_ACT_GROUP_ADD')")
-    @ResponseBody
     @PostMapping("/addGroupNumber")
     public ActResponse addGroupNumber(String source, Integer addGroupNumber) {
         actModuleService.addGroupNumber(source, addGroupNumber);
@@ -69,9 +68,8 @@ public class ReportController {
     @Log("添加单品券额外人数")
     @ApiOperation(value = "添加单品券额外人数")
     @PreAuthorize("hasAnyRole('ADMIN','REPORT_ALL','REPORT_ACT_TICKET_ADD')")
-    @ResponseBody
     @PostMapping("/addTicketNumber")
-    public ActResponse addTicketNumber(String source, ActExtraNumber actExtraNumber) throws IOException {
+    public ActResponse addTicketNumber(String source,@RequestBody @Valid ActExtraNumber actExtraNumber) throws IOException {
         actModuleService.changeTicketNumber(source, actExtraNumber);
         return ActResponse.buildSuccessResponse();
     }
@@ -97,8 +95,7 @@ public class ReportController {
     @Log("团打卡数据")
     @ApiOperation(value = "团打卡数据")
     @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_CARD_LIST')")
-    @RequestMapping("/findGroupCountBySource")
-    @ResponseBody
+    @GetMapping("/findGroupCountBySource")
     public ActResponse<List<Map>> findGroupCountBySource(String source) {
         if (ObjectUtils.isEmpty(source)) {
             return ActResponse.buildParamEmptyError("source");

@@ -71,7 +71,7 @@ public interface UserService {
      * @param file
      */
     @CacheEvict(allEntries = true)
-    void updateAvatar(MultipartFile file);
+    void updateAvatar(MultipartFile file) throws IOException;
 
     /**
      * 修改邮箱

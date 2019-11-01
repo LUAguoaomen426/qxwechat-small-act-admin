@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.common.collect.Lists;
 import com.red.star.macalline.act.admin.constant.CacheConstant;
+import com.red.star.macalline.act.admin.core.act.ActFactory;
 import com.red.star.macalline.act.admin.domain.WapActDraw;
 import com.red.star.macalline.act.admin.domain.bo.DrawElement;
 import com.red.star.macalline.act.admin.domain.bo.DrawInfoBO;
@@ -369,13 +370,13 @@ public class DrawService {
         BoostAwardDTO boostAwardDTO6 = (BoostAwardDTO) redisTemplate.opsForValue().get(awardKey6);
         BoostAwardDTO boostAwardDTO7 = (BoostAwardDTO) redisTemplate.opsForValue().get(awardKey7);
         //奖品
-        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO1) ? "300" : boostAwardDTO1.getName());
-        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO2) ? "500" : boostAwardDTO2.getName());
-        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO3) ? "1000" : boostAwardDTO3.getName());
-        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO4) ? "2000" : boostAwardDTO4.getName());
-        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO5) ? "5000" : boostAwardDTO5.getName());
-        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO6) ? "10000" : boostAwardDTO6.getName());
-        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO7) ? "49999" : boostAwardDTO7.getName());
+        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO1) ? "1" : boostAwardDTO1.getName());
+        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO2) ? "2" : boostAwardDTO2.getName());
+        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO3) ? "3" : boostAwardDTO3.getName());
+        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO4) ? "4" : boostAwardDTO4.getName());
+        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO5) ? "5" : boostAwardDTO5.getName());
+        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO6) ? "6" : boostAwardDTO6.getName());
+        gradeMap.add(ObjectUtils.isEmpty(boostAwardDTO7) ? "7" : boostAwardDTO7.getName());
         luckyVoList.forEach(entity -> {
             Boolean mallFlag = judgeMall(entity.getOmsCode());
             entity.setMallFlag(mallFlag);
@@ -438,7 +439,9 @@ public class DrawService {
         List<LuckyVo> luckyList = Lists.newArrayList();
         //十一月大促抽奖数据处理
         //获取所有券信息
-        Map<String, List<ActGroupTicketV2>> drawTicketInfo = comService.getAllDrawTicketInfo("1009", luckyBo.getSource(), "11");
+        Object drawOmsCode1 = ActFactory.create(luckyBo.getSource()).getConfig("DRAW_OMS_CODE");
+        String drawOmsCode = ObjectUtils.isEmpty(drawOmsCode1) ? "" : drawOmsCode1.toString();
+        Map<String, List<ActGroupTicketV2>> drawTicketInfo = comService.getAllDrawTicketInfo(drawOmsCode, luckyBo.getSource(), "11");
         List<String> gradeMap = Lists.newArrayList();
         for (int i = 1; i <= 4; i++) {
             List<ActGroupTicketV2> ticketV2s = drawTicketInfo.get("" + i);
@@ -446,6 +449,26 @@ public class DrawService {
                 for (ActGroupTicketV2 ticketV2 : ticketV2s) {
                     gradeMap.add(getDrawPrizeName("" + i, ticketV2));
                 }
+            }
+        }
+        //修改查询
+        if (!ObjectUtils.isEmpty(luckyBo.getGrade())) {
+            String s = gradeMap.get(luckyBo.getGrade() - 1);
+            if (s.startsWith("普通")) {
+                luckyBo.setType("lucky1");
+                luckyBo.setGrade(luckyBo.getGrade() - 1);
+            }
+            if (s.startsWith("大额")) {
+                luckyBo.setType("lucky2");
+                luckyBo.setGrade(luckyBo.getGrade() - 5);
+            }
+            if (s.startsWith("超额")) {
+                luckyBo.setType("lucky3");
+                luckyBo.setGrade(luckyBo.getGrade() - 7);
+            }
+            if (s.startsWith("巨额")) {
+                luckyBo.setType("lucky4");
+                luckyBo.setGrade(luckyBo.getGrade() - 9);
             }
         }
         //得到查询结果
@@ -457,7 +480,8 @@ public class DrawService {
             if (e.getType().length() > 5) {
                 packetId = e.getType().substring(5);
             }
-            ActGroupTicketV2 ticketV2 = drawTicketInfo.get(packetId).get(e.getGrade());
+            List<ActGroupTicketV2> actGroupTicketV2s = drawTicketInfo.get(packetId);
+            ActGroupTicketV2 ticketV2 = actGroupTicketV2s.get(e.getGrade());
             e.setGradeName(getDrawPrizeName(packetId, ticketV2));
             if (null != luckyBo.getMallFlag()) {
                 if (mallFlag.equals(luckyBo.getMallFlag())) {

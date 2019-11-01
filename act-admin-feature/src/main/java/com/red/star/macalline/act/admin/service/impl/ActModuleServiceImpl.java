@@ -46,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -82,6 +84,9 @@ public class ActModuleServiceImpl implements ActModuleService {
 
     @Resource
     private RedisTemplate redisTemplate;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Resource
     private MallMybatisMapper mallMybatisMapper;
@@ -166,7 +171,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         actInfo.setShowImage(removeImageWatermark(actInfo.getShowImage()));
 
         actModuleMybatisMapper.update(actInfo, new UpdateWrapper<ActModule>()
-                .eq("actCode", actInfo.getActCode()));
+                .eq("act_code", actInfo.getActCode()));
 
 
         //刷新缓存
@@ -248,7 +253,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         }
         //上传图片地址去水印
         actInfo.setShowImage(removeImageWatermark(actInfo.getShowImage()));
-
+        actInfo.setProgramConfig(ObjectUtils.isEmpty(actInfo.getProgramConfig()) ? null : actInfo.getProgramConfig());
         this.actModuleMybatisMapper.insert(actInfo);
         //初始化商场数据
         List<Mall> defultInfo = mallMybatisMapper.findMallDefultInfo();
@@ -470,22 +475,22 @@ public class ActModuleServiceImpl implements ActModuleService {
         }
         if (!"T".equals(actSpecLink.getHaveTL())) {
             //不需要时间限制
-            actSpecLink.setTimeLimit(null);
+            actSpecLink.setTime(null);
         }
-
+        List<String> time = actSpecLink.getTime();
+        if (!ObjectUtils.isEmpty(time) && time.size() == 2) {
+            HashMap<Object, Object> map = Maps.newHashMap();
+            map.put("startTime", time.get(0));
+            map.put("endTime", time.get(1));
+            actSpecLink.setTimeLimit(JSON.toJSONString(map));
+        }
         int i = actSpecLinkMybatisMapper.insert(actSpecLink);
         //更新关联的act_mall_sepc__merge表
         //查询出所有商场信息
         List<Mall> malls = mallMybatisMapper.selectList(null);
         malls.stream().forEach(m -> m.setLinkShow(false));
         actSpecLinkMybatisMapper.insertSpecLinkMergeByList(actCode, actSpecLink.getSpecCode(), malls);
-
-        //清理缓存
-        for (Mall m : mallMybatisMapper.selectList(null))
-            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
-        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK_ALLOWED_MALL);
-        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_DEFAULT_MALL + actSpecLink.getSpecCode());
-
+        clearSpecLink(actCode, actSpecLink);
         return ActResponse.buildSuccessResponse("SUCCESS");
     }
 
@@ -515,27 +520,26 @@ public class ActModuleServiceImpl implements ActModuleService {
             actSpecLink.setShowImage(null);
         }
         if (!"T".equals(actSpecLink.getHaveTL())) {
-            actSpecLink.setTimeLimit(null);
+            actSpecLink.setTime(null);
         }
+        actSpecLink.setMallList(actSpecLink.getChangeMallList());
         if (actSpecLink.getMallList().size() > 0) {
             actSpecLinkMybatisMapper.updateSpecLinkMergerByList(actCode, actSpecLink.getSpecCode(), actSpecLink.getMallList());
         }
-        if ((!ObjectUtils.isEmpty(actSpecLink.getTimeLimit()) && !actSpecLink.getTimeLimit().equals(oldInfo.getTimeLimit())) || !oldInfo.getName().equals(actSpecLink.getName()) || !oldInfo.getUrl().equals(actSpecLink.getUrl()) || (!ObjectUtils.isEmpty(actSpecLink.getShowImage()) && !actSpecLink.getShowImage().equals(oldInfo.getShowImage()))) {
+        if ((!ObjectUtils.isEmpty(actSpecLink.getTime())) || !oldInfo.getName().equals(actSpecLink.getName()) || !oldInfo.getUrl().equals(actSpecLink.getUrl()) || (!ObjectUtils.isEmpty(actSpecLink.getShowImage()) && !actSpecLink.getShowImage().equals(oldInfo.getShowImage()))) {
             //修改了名称或者url，需要清除所有缓存
+            List<String> time = actSpecLink.getTime();
+            if (!ObjectUtils.isEmpty(time) && time.size() == 2) {
+                HashMap<Object, Object> map = Maps.newHashMap();
+                map.put("startTime", time.get(0));
+                map.put("endTime", time.get(1));
+                actSpecLink.setTimeLimit(JSON.toJSONString(map));
+            }
             actSpecLinkMybatisMapper.update(actSpecLink, new UpdateWrapper<ActSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
-
-            for (Mall m : mallMybatisMapper.selectList(null))
-                redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
-            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK_ALLOWED_MALL);
-            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_DEFAULT_MALL + actSpecLink.getSpecCode());
+            clearSpecLink(actCode, actSpecLink);
             return ActResponse.buildSuccessResponse("SUCCESS");
         }
-        //清除部分修改的缓存信息
-        for (Mall m : actSpecLink.getMallList()) {
-            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
-        }
-        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK_ALLOWED_MALL);
-        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_DEFAULT_MALL + actSpecLink.getSpecCode());
+        clearSpecLink(actCode, actSpecLink);
         return ActResponse.buildSuccessResponse("SUCCESS");
     }
 
@@ -556,11 +560,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         }
         actSpecLinkMybatisMapper.delete(new QueryWrapper<ActSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
         actSpecLinkMybatisMapper.deleteSpecLinkMergerByList(actCode, actSpecLink.getSpecCode());
-
-        for (Mall m : mallMybatisMapper.selectList(null))
-            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
-        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK_ALLOWED_MALL);
-        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_DEFAULT_MALL + actSpecLink.getSpecCode());
+        clearSpecLink(actCode, actSpecLink);
         return ActResponse.buildSuccessResponse();
     }
 
@@ -588,10 +588,10 @@ public class ActModuleServiceImpl implements ActModuleService {
     public void addGroupNumber(String source, Integer addGroupNumber) {
         String key = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_EXTRA_NUMBER;
         if (!redisTemplate.hasKey(key)) {
-            redisTemplate.opsForValue().set(key, 0, -1);
+            redisTemplate.opsForValue().set(key, 0);
         }
-        Integer extraNumber = Integer.parseInt((String) redisTemplate.opsForValue().get(key));
-        redisTemplate.opsForValue().set(key, extraNumber + addGroupNumber, -1);
+        Integer extraNumber = Integer.parseInt(stringRedisTemplate.opsForValue().get(key));
+        stringRedisTemplate.opsForValue().set(key, String.valueOf(extraNumber + addGroupNumber));
     }
 
     @Override
@@ -669,7 +669,7 @@ public class ActModuleServiceImpl implements ActModuleService {
     @Override
     public List<SourcePvUvVo> analysisPVUVData(SourcePvUvBo sourcePvUvBo) {
         String key = CacheConstant.CACHE_KEY_PREFIX + sourcePvUvBo.getSource() + CacheConstant.CACHE_KEY_PVUV;
-        String s = (String) redisTemplate.opsForValue().get(key);
+        String s = (String) stringRedisTemplate.opsForValue().get(key);
         List<SourcePvUvVo> sourcePvUvVoList = Lists.newArrayList();
         if (ObjectUtils.isEmpty(s) || sourcePvUvBo.isActualFlag()) {
             SourcePvUvVo sourcePvUvVo = new SourcePvUvVo();
@@ -684,7 +684,7 @@ public class ActModuleServiceImpl implements ActModuleService {
             }
             sourcePvUvVo.setDate("日期总计");
             sourcePvUvVoList.addAll(sourcePvUvVoData);
-            redisTemplate.opsForValue().set(key, JSON.toJSONString(sourcePvUvVoList), CacheConstant.DAY);
+            stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(sourcePvUvVoList), CacheConstant.DAY, TimeUnit.SECONDS);
         } else {
             List<SourcePvUvVo> sourcePvUvVoList2 = Lists.newArrayList();
             if (JsonUtil.isJSON(s)) {
@@ -695,7 +695,7 @@ public class ActModuleServiceImpl implements ActModuleService {
                         i.getAndIncrement();
                         if (i.get() > 2) {
                             try {
-                                if (DateNewUtil.parseAnyString(e.getDate()).after(DateNewUtil.parseAnyString(sourcePvUvBo.getStartTime())) && DateNewUtil.parseAnyString(e.getDate()).before(DateNewUtil.parseAnyString(sourcePvUvBo.getEndTime()))) {
+                                if (DateNewUtil.parseAnyString(e.getDate()).after(sourcePvUvBo.getStartTime()) && DateNewUtil.parseAnyString(e.getDate()).before(sourcePvUvBo.getEndTime())) {
                                     sourcePvUvVoList2.add(e);
                                 }
                             } catch (ParseException ex) {
@@ -711,6 +711,15 @@ public class ActModuleServiceImpl implements ActModuleService {
             sourcePvUvVoList = sourcePvUvVoList2;
         }
         return sourcePvUvVoList;
+    }
+
+    @Override
+    public void clearSpecLink(String actCode, ActSpecLink actSpecLink) {
+        for (Mall m : mallMybatisMapper.selectList(null)) {
+            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK + m.getOmsCode());
+        }
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_LINK_ALLOWED_MALL);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_SPEC_DEFAULT_MALL + actSpecLink.getSpecCode());
     }
 
     /**
@@ -766,9 +775,9 @@ public class ActModuleServiceImpl implements ActModuleService {
     public Integer findGroupNumber(String source) {
         String key = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_GROUP_NUMBER;
         if (!redisTemplate.hasKey(key)) {
-            redisTemplate.opsForValue().set(key, 200, -1);
+            redisTemplate.opsForValue().set(key, 200);
         }
-        Integer extraNumber = Integer.parseInt((String) redisTemplate.opsForValue().get(key));
+        Integer extraNumber = (Integer) redisTemplate.opsForValue().get(key);
         return extraNumber;
     }
 
@@ -781,9 +790,9 @@ public class ActModuleServiceImpl implements ActModuleService {
     public Integer findExtraNumber(String source) {
         String key = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_EXTRA_NUMBER;
         if (!redisTemplate.hasKey(key)) {
-            redisTemplate.opsForValue().set(key, 0, -1);
+            redisTemplate.opsForValue().set(key, 0);
         }
-        Integer extraNumber = Integer.parseInt((String) redisTemplate.opsForValue().get(key));
+        Integer extraNumber = (Integer) redisTemplate.opsForValue().get(key);
         return extraNumber;
     }
 

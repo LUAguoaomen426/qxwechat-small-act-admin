@@ -1,7 +1,6 @@
 package com.red.star.macalline.act.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.domain.vo.ActResponse;
 import com.red.star.macalline.act.admin.service.dto.MallDTO;
@@ -56,7 +55,8 @@ public interface MallService extends IService<Mall> {
      *
      * @param resources
      */
-    void update(List<Mall> resources);
+//    void update(List<Mall> resources);
+    void update(Mall resources);
 
     /**
      * 删除

@@ -42,7 +42,7 @@ public class RabbitForwardService {
 
     public <T> void sendMsgToFanoutExchange(String fanoutExchange, T data) {
         String message = JSON.toJSONString(data);
-        logger.info("Send message to RMQ, FanoutExchange = {},, msg = {}", fanoutExchange, "", message);
+        logger.info("Send message to RMQ, FanoutExchange = {}, msg = {}", fanoutExchange, message);
         amqpTemplate.convertAndSend(fanoutExchange, "", message);
     }
 }

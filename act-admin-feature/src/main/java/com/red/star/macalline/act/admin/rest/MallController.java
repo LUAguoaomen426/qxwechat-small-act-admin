@@ -49,8 +49,12 @@ public class MallController {
     @ApiOperation(value = "修改TbWapMall")
     @PutMapping(value = "/mall")
     @PreAuthorize("hasAnyRole('ADMIN','MALL_ALL','MALL_EDIT')")
-    public ResponseEntity update(@Validated @RequestBody List<Mall> malls) {
-        mallService.update(malls);
+//    public ResponseEntity update(@Validated @RequestBody List<Mall> malls) {
+//        mallService.update(malls);
+//        return new ResponseEntity(HttpStatus.NO_CONTENT);
+//    }
+    public ResponseEntity update(@Validated @RequestBody Mall resources) {
+        mallService.update(resources);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 

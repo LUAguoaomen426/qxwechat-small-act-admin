@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -153,15 +152,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateAvatar(MultipartFile multipartFile) {
+    public void updateAvatar(MultipartFile multipartFile) throws IOException {
         User user = userRepository.findByUsername(SecurityUtils.getUsername());
         UserAvatar userAvatar = user.getUserAvatar();
         String oldPath = "";
         if (userAvatar != null) {
             oldPath = userAvatar.getPath();
         }
-        File file = FileUtil.upload(multipartFile, avatar);
-        userAvatar = userAvatarRepository.save(new UserAvatar(userAvatar, file.getName(), file.getPath(), FileUtil.getSize(multipartFile.getSize())));
+        String suffix = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+        String url = FileNewUtil.uploadFile("temp" + suffix, multipartFile.getBytes());
+        userAvatar = userAvatarRepository.save(new UserAvatar(userAvatar, url, url, FileUtil.getSize(multipartFile.getSize())));
         user.setUserAvatar(userAvatar);
         userRepository.save(user);
         if (StringUtils.isNotBlank(oldPath)) {

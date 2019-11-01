@@ -158,7 +158,7 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "/users/updateAvatar")
-    public ResponseEntity updateAvatar(@RequestParam MultipartFile file) {
+    public ResponseEntity updateAvatar(@RequestParam MultipartFile file) throws IOException {
         userService.updateAvatar(file);
         return new ResponseEntity(HttpStatus.OK);
     }
