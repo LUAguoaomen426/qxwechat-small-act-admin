@@ -32,9 +32,9 @@ public class ActDrawController {
 
     @Log("获取抽奖信息")
     @ApiOperation(value = "获取抽奖信息")
-    @GetMapping("/{actCode}/draw")
+    @GetMapping("/{actCode}/draw/{drawID}")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ALL_DRAW_ALL','ALL_DRAW_INFO_LIST')")
-    public ActResponse getDrawMatrix(@PathVariable("actCode") String actCode, String drawID) {
+    public ActResponse getDrawMatrix(@PathVariable("actCode") String actCode, @PathVariable("drawID")String drawID) {
         DrawVO drawVO = drawService.drawInfo(actCode, drawID);
         return ActResponse.buildSuccessResponse(drawVO);
     }

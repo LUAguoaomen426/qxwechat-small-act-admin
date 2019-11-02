@@ -100,7 +100,7 @@ public class DrawService {
         String drawKey = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.CACHE_KEY_ACT_DRAW + drawID;
         String drawInfo = String.valueOf(stringRedisTemplate.opsForHash().get(drawKey, CacheConstant.CACHE_KEY_ACT_DRAW_INFO));
         DrawInfoBO drawInfoBO = JSONObject.parseObject(drawInfo, DrawInfoBO.class);
-        if (drawInfo == null) {
+        if (ObjectUtils.isEmpty(drawInfo)) {
             drawInfoBO = getDrawInfoByMapper(source, drawID);
         }
         String hget = String.valueOf(stringRedisTemplate.opsForHash().get(drawKey, CacheConstant.CACHE_KEY_ACT_DRAW_MARTIX));
