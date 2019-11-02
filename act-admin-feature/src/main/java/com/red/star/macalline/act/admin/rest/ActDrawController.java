@@ -79,9 +79,9 @@ public class ActDrawController {
 
     @Log("删除抽奖信息")
     @ApiOperation(value = "删除抽奖信息")
-    @GetMapping("/{actCode}/draw/delete")
+    @DeleteMapping("/{actCode}/draw/{drawID}")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ALL_DRAW_ALL','ALL_DRAW_INFO_DELETE')")
-    public ActResponse deleteDraw(@PathVariable("actCode") String actCode, String drawID) {
+    public ActResponse deleteDraw(@PathVariable("actCode") String actCode, @PathVariable("drawID")String drawID) {
         return drawService.deleteDraw(actCode, drawID);
     }
 
