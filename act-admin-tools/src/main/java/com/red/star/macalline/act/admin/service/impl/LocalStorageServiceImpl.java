@@ -33,12 +33,6 @@ public class LocalStorageServiceImpl implements LocalStorageService {
     @Autowired
     private LocalStorageMapper localStorageMapper;
 
-    @Value("${file.path}")
-    private String path;
-
-    @Value("${file.maxSize}")
-    private long maxSize;
-
     @Override
     public Object queryAll(LocalStorageQueryCriteria criteria, Pageable pageable) {
         Page<LocalStorage> page = localStorageRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
@@ -60,28 +54,29 @@ public class LocalStorageServiceImpl implements LocalStorageService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public LocalStorageDTO create(String name, MultipartFile multipartFile) {
-        FileUtil.checkSize(maxSize, multipartFile.getSize());
-        String suffix = FileUtil.getExtensionName(multipartFile.getOriginalFilename());
-        // 可自行选择方式
-//        String type = FileUtil.getFileTypeByMimeType(suffix);
-        String type = FileUtil.getFileType(suffix);
-        File file = FileUtil.upload(multipartFile, path + type + File.separator);
-        try {
-            name = StringUtils.isBlank(name) ? FileUtil.getFileNameNoEx(multipartFile.getOriginalFilename()) : name;
-            LocalStorage localStorage = new LocalStorage(
-                    file.getName(),
-                    name,
-                    suffix,
-                    file.getPath(),
-                    type,
-                    FileUtil.getSize(multipartFile.getSize()),
-                    SecurityUtils.getUsername()
-            );
-            return localStorageMapper.toDto(localStorageRepository.save(localStorage));
-        } catch (Exception e) {
-            FileUtil.del(file);
-            throw e;
-        }
+//        FileUtil.checkSize(maxSize, multipartFile.getSize());
+//        String suffix = FileUtil.getExtensionName(multipartFile.getOriginalFilename());
+//        // 可自行选择方式
+////        String type = FileUtil.getFileTypeByMimeType(suffix);
+//        String type = FileUtil.getFileType(suffix);
+//        File file = FileUtil.upload(multipartFile, path + type + File.separator);
+//        try {
+//            name = StringUtils.isBlank(name) ? FileUtil.getFileNameNoEx(multipartFile.getOriginalFilename()) : name;
+//            LocalStorage localStorage = new LocalStorage(
+//                    file.getName(),
+//                    name,
+//                    suffix,
+//                    file.getPath(),
+//                    type,
+//                    FileUtil.getSize(multipartFile.getSize()),
+//                    SecurityUtils.getUsername()
+//            );
+//            return localStorageMapper.toDto(localStorageRepository.save(localStorage));
+//        } catch (Exception e) {
+//            FileUtil.del(file);
+//            throw e;
+//        }
+        return null;
     }
 
     public static void main(String[] args) {
