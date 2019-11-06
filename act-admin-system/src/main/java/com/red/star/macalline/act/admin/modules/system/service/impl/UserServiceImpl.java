@@ -47,9 +47,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserAvatarRepository userAvatarRepository;
 
-    @Value("${file.avatar}")
-    private String avatar;
-
     @Override
     public Object queryAll(UserQueryCriteria criteria, Pageable pageable) {
         Page<User> page = userRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);

@@ -33,9 +33,6 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     @Autowired
     private VerificationCodeRepository verificationCodeRepository;
 
-    @Value("${code.expiration}")
-    private Integer expiration;
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public EmailVo sendEmail(VerificationCode code) {
@@ -81,7 +78,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
             executorService.schedule(() -> {
                 verifyCode.setStatus(false);
                 verificationCodeRepository.save(verifyCode);
-            }, expiration * 60 * 1000L, TimeUnit.MILLISECONDS);
+            }, 2 * 60 * 1000L, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             e.printStackTrace();
         }

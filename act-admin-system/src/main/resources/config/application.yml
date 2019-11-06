@@ -1,7 +1,6 @@
-server:
-  port: 8000
-
 spring:
+  application:
+    name: act-admin-server
   freemarker:
     check-template-location: false
   profiles:
@@ -19,26 +18,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
     open-in-view: true
-
-  redis:
-    jedis:
-      pool:
-        max-wait: 1000
-        max-Idle: 16
-        min-Idle: 0
-    cluster:
-      nodes: 47.110.60.167:7001,47.110.60.167:7002,47.110.60.167:7003,47.110.60.167:7004,47.110.60.167:7005,47.110.60.167:7006
-    timeout: 1000
-    password: ab42QAXCE@23
-
-#七牛云
-qiniu:
-  # 文件大小 /M
-  max-size: 15
-
-#邮箱验证码有效时间/分钟
-code:
-  expiration: 5
 
 #登录图形验证码有效时间/分钟
 loginCode:

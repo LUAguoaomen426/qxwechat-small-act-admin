@@ -3,13 +3,14 @@ server:
   servlet:
     context-path: /act_admin_api
 
+#配置数据源
 spring:
   datasource:
     #配置jpa数据源（主-写）
     primary:
       type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://47.111.155.104:3306/macalline_dev?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+      url: jdbc:mysql://47.111.155.104:3306/macalline_test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
       username: macalline_db
       password: macalline_db@5621df08A9df9E0
       # 初始化配置
@@ -40,7 +41,7 @@ spring:
     read:
       type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://47.111.155.104:3306/macalline_dev?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+      url: jdbc:mysql://47.111.155.104:3306/macalline_test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
       username: macalline_db
       password: macalline_db@5621df08A9df9E0
       # 初始化配置
@@ -76,24 +77,23 @@ spring:
           username: macalline_db
           password: macalline_db@5621df08A9df9E0
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://47.111.155.104:3306/macalline_dev?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+          url: jdbc:mysql://47.111.155.104:3306/macalline_test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
         slave:
           username: macalline_db
           password: macalline_db@5621df08A9df9E0
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://47.111.155.104:3306/macalline_dev?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+          url: jdbc:mysql://47.111.155.104:3306/macalline_test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
 
   #配置 Jpa
   jpa:
     hibernate:
       # 生产环境设置成 none，避免程序运行时自动更新数据库结构
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: none
   rabbitmq:
     addresses: 47.111.155.104:5672
     username: macalline_mq
     password: macalline_mq@5621df08A9df9E0
-    virtual-host: dev
+    virtual-host: uat
     publisher-confirms: true
   redis:
     jedis:
@@ -102,7 +102,7 @@ spring:
         max-Idle: 16
         min-Idle: 0
     cluster:
-      nodes: 47.110.60.167:7001,47.110.60.167:7002,47.110.60.167:7003,47.110.60.167:7004,47.110.60.167:7005,47.110.60.167:7006
+      nodes: 47.111.155.104:7001,47.111.155.104:7002,47.111.155.104:7003,47.111.155.104:7004,47.111.155.104:7005,47.111.155.104:7006
     timeout: 2000
     password: ab42QAXCE@23
 
@@ -110,7 +110,7 @@ spring:
 jwt:
   header: Authorization
   secret: mySecret
-  # token 过期时间 6个小时
+  # token 过期时间 2个小时
   expiration: 21000000
   auth:
     # 授权路径
