@@ -156,10 +156,12 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ENTRANCE);
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_CODE + tbWapMall.getMallCode());
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_OMS_CODE + tbWapMall.getOmsCode());
+        redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_CITY_DEFAULT + tbWapMall.getCity());
         //清除大促缓存
         for (ActModule actModule :
                 actModuleMybatisMapper.listEnableAct()) {
             redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME + actModule.getActCode());
+            redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actModule.getActCode() + CacheConstant.CACHE_KEY_ACT_MALL_OMS_CODE);
         }
     }
 
@@ -360,6 +362,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
         //清除一下缓存
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ACT + actCode);
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME + actCode);
+        redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_MALL_MERGE + actCode);
         redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_MALL_OMS_CODE);
 
         return ActResponse.buildSuccessResponse();
