@@ -146,6 +146,12 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
             throw new EntityExistException(Mall.class, "mall_code", resources.getMallCode());
         }
         tbWapMall.copy(resources);
+        //一个城市下只有一个默认商场
+        if (tbWapMall.getDefaultEnable()) {
+            mallMybatisMapper.updateActMallDefultEnableByCity(tbWapMall.getCity());
+            //刷新缓存
+            redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_CITY_DEFAULT + tbWapMall.getCity());
+        }
         mallRepository.save(tbWapMall);
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ENTRANCE);
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_CODE + tbWapMall.getMallCode());

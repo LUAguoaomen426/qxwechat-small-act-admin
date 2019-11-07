@@ -35,7 +35,7 @@ public class ActModuleController {
     @Log("查询TbWapActModule")
     @ApiOperation(value = "查询TbWapActModule")
     @GetMapping(value = "/actModule")
-    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','TBWAPACTMODULE_SELECT')")
+    @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_LIST')")
     public ResponseEntity getTbWapActModules(ActModuleQueryCriteria criteria, Pageable pageable) {
         return new ResponseEntity(actModuleService.queryAll(criteria, pageable), HttpStatus.OK);
     }
