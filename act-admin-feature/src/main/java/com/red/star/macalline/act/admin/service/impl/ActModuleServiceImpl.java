@@ -526,7 +526,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         if (actSpecLink.getMallList().size() > 0) {
             actSpecLinkMybatisMapper.updateSpecLinkMergerByList(actCode, actSpecLink.getSpecCode(), actSpecLink.getMallList());
         }
-        if ((!ObjectUtils.isEmpty(actSpecLink.getTime())) || !oldInfo.getName().equals(actSpecLink.getName()) || !oldInfo.getUrl().equals(actSpecLink.getUrl()) || (!ObjectUtils.isEmpty(actSpecLink.getShowImage()) && !actSpecLink.getShowImage().equals(oldInfo.getShowImage()))) {
+        if (!ObjectUtils.isEmpty(actSpecLink.getBindActCode())||(!ObjectUtils.isEmpty(actSpecLink.getTime())) || !oldInfo.getName().equals(actSpecLink.getName()) || !oldInfo.getUrl().equals(actSpecLink.getUrl()) || (!ObjectUtils.isEmpty(actSpecLink.getShowImage()) && !actSpecLink.getShowImage().equals(oldInfo.getShowImage()))) {
             //修改了名称或者url，需要清除所有缓存
             List<String> time = actSpecLink.getTime();
             if (!ObjectUtils.isEmpty(time) && time.size() == 2) {

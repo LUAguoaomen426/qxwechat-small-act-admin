@@ -78,4 +78,7 @@ public class ActSpecLink implements Serializable {
     @Transient
     @TableField(exist = false)
     private String haveTL;
+
+    /** 绑定的活动code */
+    private String bindActCode;
 }

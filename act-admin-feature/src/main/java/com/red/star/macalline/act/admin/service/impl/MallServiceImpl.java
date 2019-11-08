@@ -279,7 +279,7 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
             return ActResponse.buildErrorResponse("参数有误");
         }
         mallMybatisMapper.updateActMallMerge(actCode, mallList);
-
+        //判断是否同时为广告位 如果是，则同步更新广告位内的商场
         //清除一下缓存
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ACT + actCode);
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME + actCode);

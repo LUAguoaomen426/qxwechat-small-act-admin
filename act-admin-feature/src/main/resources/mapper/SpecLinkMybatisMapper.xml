@@ -18,6 +18,7 @@
                sl.sort,
                sl.type,
                sl.time_limit,
+               sl.bind_act_code,
                wm.oms_code,
                wm.mall_code,
                wm.mall_name,
