@@ -75,7 +75,7 @@
         <if test="luckyBo.mobile!=null and luckyBo.mobile!=''">
             AND u.mobile = #{luckyBo.mobile}
         </if>
-        <if test="luckyBo.grade!=null and luckyBo.grade!=0">
+        <if test="luckyBo.grade!=null">
             AND e.ticket_grade = #{luckyBo.grade}
         </if>
         <if test="luckyBo.startTime!=null">AND e.create_time BETWEEN #{luckyBo.startTime}

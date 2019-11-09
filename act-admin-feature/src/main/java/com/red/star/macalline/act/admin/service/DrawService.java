@@ -436,21 +436,70 @@ public class DrawService {
             //十月份大促-查询不同
             return analysisLuckyDataOctober(luckyBo);
         }
+        if (luckyBo.getSource().equals("november")) {
+            return analysisLuckyDataNovember(luckyBo);
+        }
+
+        List<WapActDraw> select = wapActDrawMapper.selectList(new QueryWrapper<WapActDraw>().lambda().eq(WapActDraw::getActCode, luckyBo.getSource()));
+        if (select.size() < 1) {
+            return new LuckyData();
+        }
+        List<String> gradeMap = Lists.newArrayList();
+        gradeMap.add("100元免单券");
+        gradeMap.add("200元免单券");
+        gradeMap.add("666元免单券");
+        gradeMap.add("9999元免单券");
+        //修改查询
+        if (!ObjectUtils.isEmpty(luckyBo.getGrade())) {
+            switch (luckyBo.getGrade()) {
+                case 1:
+                    luckyBo.setGrade(100);
+                    break;
+                case 2:
+                    luckyBo.setGrade(200);
+                    break;
+                case 3:
+                    luckyBo.setGrade(666);
+                    break;
+                case 4:
+                    luckyBo.setGrade(9999);
+                    break;
+            }
+        }
+        List<LuckyVo> luckyList = Lists.newArrayList();
+        List<LuckyVo> luckyVoList = comMybatisMapper.analysisLuckyData(luckyBo);
+        luckyVoList.forEach(e -> {
+            Boolean mallFlag = judgeMall(e.getOmsCode());
+            e.setMallFlag(mallFlag);
+            e.setGradeName(e.getGrade()+"元免单券");
+            if (null != luckyBo.getMallFlag()) {
+                if (mallFlag.equals(luckyBo.getMallFlag())) {
+                    luckyList.add(e);
+                }
+            } else {
+                luckyList.add(e);
+            }
+        });
+        return new LuckyData(luckyList, gradeMap);
+    }
+
+    private LuckyData analysisLuckyDataNovember(LuckyBo luckyBo) {
         List<LuckyVo> luckyList = Lists.newArrayList();
         //十一月大促抽奖数据处理
         //获取所有券信息
         Object drawOmsCode1 = ActFactory.create(luckyBo.getSource()).getConfig("DRAW_OMS_CODE");
         String drawOmsCode = ObjectUtils.isEmpty(drawOmsCode1) ? "" : drawOmsCode1.toString();
-        Map<String, List<ActGroupTicketV2>> drawTicketInfo = comService.getAllDrawTicketInfo(drawOmsCode, luckyBo.getSource(), "11");
         List<String> gradeMap = Lists.newArrayList();
-        for (int i = 1; i <= 4; i++) {
-            List<ActGroupTicketV2> ticketV2s = drawTicketInfo.get("" + i);
-            if (!ObjectUtils.isEmpty(ticketV2s)) {
-                for (ActGroupTicketV2 ticketV2 : ticketV2s) {
-                    gradeMap.add(getDrawPrizeName("" + i, ticketV2));
-                }
-            }
-        }
+        gradeMap.add("普通红包-100");
+        gradeMap.add("普通红包-200");
+        gradeMap.add("普通红包-300");
+        gradeMap.add("普通红包-500");
+        gradeMap.add("大额红包-511");
+        gradeMap.add("大额红包-1111");
+        gradeMap.add("超额红包-777");
+        gradeMap.add("超额红包-11111");
+        gradeMap.add("巨额红包-2111");
+        gradeMap.add("巨额红包-49999");
         //修改查询
         if (!ObjectUtils.isEmpty(luckyBo.getGrade())) {
             String s = gradeMap.get(luckyBo.getGrade() - 1);
@@ -476,13 +525,12 @@ public class DrawService {
         luckyVoList.forEach(e -> {
             Boolean mallFlag = judgeMall(e.getOmsCode());
             e.setMallFlag(mallFlag);
-            String packetId = "1";
+            Integer deviationVal = 1;
             if (e.getType().length() > 5) {
-                packetId = e.getType().substring(5);
+                Integer groupId = Integer.valueOf(e.getType().substring(5));
+                deviationVal = groupId == 1 ? 0 : (groupId - 2) * 2 + 4;
             }
-            List<ActGroupTicketV2> actGroupTicketV2s = drawTicketInfo.get(packetId);
-            ActGroupTicketV2 ticketV2 = actGroupTicketV2s.get(e.getGrade());
-            e.setGradeName(getDrawPrizeName(packetId, ticketV2));
+            e.setGradeName(gradeMap.get(deviationVal + e.getGrade()));
             if (null != luckyBo.getMallFlag()) {
                 if (mallFlag.equals(luckyBo.getMallFlag())) {
                     luckyList.add(e);
@@ -492,26 +540,7 @@ public class DrawService {
             }
         });
         return new LuckyData(luckyList, gradeMap);
-
     }
 
-    private String getDrawPrizeName(String packetId, ActGroupTicketV2 ticketV2) {
-        String namePrefix = "未知-";
-        switch (packetId) {
-            case "1":
-                namePrefix = "普通红包-";
-                break;
-            case "2":
-                namePrefix = "大额红包-";
-                break;
-            case "3":
-                namePrefix = "超额红包-";
-                break;
-            case "4":
-                namePrefix = "巨额红包-";
-                break;
-        }
-        return namePrefix + (ticketV2.getTicketTypeId().equals(1) ? ticketV2.getCashAmt() : new BigDecimal(ticketV2.getFullcutCutAmt())).intValue();
 
-    }
 }
