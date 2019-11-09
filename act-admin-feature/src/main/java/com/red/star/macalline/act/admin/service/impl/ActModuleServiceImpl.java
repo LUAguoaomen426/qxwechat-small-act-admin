@@ -515,10 +515,6 @@ public class ActModuleServiceImpl implements ActModuleService {
         actSpecLink.setShowImage(removeImageWatermark(actSpecLink.getShowImage()));
         ActSpecLink oldInfo = actSpecLinkMybatisMapper.selectOne(new QueryWrapper<ActSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
 
-        if (actSpecLink.getType().equals(1)) {
-            //当前为特殊链接，不存储图片
-            actSpecLink.setShowImage(null);
-        }
         if (!"T".equals(actSpecLink.getHaveTL())) {
             actSpecLink.setTime(null);
         }
