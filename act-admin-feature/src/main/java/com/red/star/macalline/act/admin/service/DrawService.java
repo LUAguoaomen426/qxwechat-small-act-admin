@@ -481,14 +481,16 @@ public class DrawService {
                 packetId = e.getType().substring(5);
             }
             List<ActGroupTicketV2> actGroupTicketV2s = drawTicketInfo.get(packetId);
-            ActGroupTicketV2 ticketV2 = actGroupTicketV2s.get(e.getGrade());
-            e.setGradeName(getDrawPrizeName(packetId, ticketV2));
-            if (null != luckyBo.getMallFlag()) {
-                if (mallFlag.equals(luckyBo.getMallFlag())) {
+            if (!ObjectUtils.isEmpty(actGroupTicketV2s)) {
+                ActGroupTicketV2 ticketV2 = actGroupTicketV2s.get(e.getGrade());
+                e.setGradeName(getDrawPrizeName(packetId, ticketV2));
+                if (null != luckyBo.getMallFlag()) {
+                    if (mallFlag.equals(luckyBo.getMallFlag())) {
+                        luckyList.add(e);
+                    }
+                } else {
                     luckyList.add(e);
                 }
-            } else {
-                luckyList.add(e);
             }
         });
         return new LuckyData(luckyList, gradeMap);
