@@ -515,10 +515,6 @@ public class ActModuleServiceImpl implements ActModuleService {
         actSpecLink.setShowImage(removeImageWatermark(actSpecLink.getShowImage()));
         ActSpecLink oldInfo = actSpecLinkMybatisMapper.selectOne(new QueryWrapper<ActSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
 
-        if (actSpecLink.getType().equals(1)) {
-            //当前为特殊链接，不存储图片
-            actSpecLink.setShowImage(null);
-        }
         if (!"T".equals(actSpecLink.getHaveTL())) {
             actSpecLink.setTime(null);
         }
@@ -526,7 +522,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         if (actSpecLink.getMallList().size() > 0) {
             actSpecLinkMybatisMapper.updateSpecLinkMergerByList(actCode, actSpecLink.getSpecCode(), actSpecLink.getMallList());
         }
-        if ((!ObjectUtils.isEmpty(actSpecLink.getTime())) || !oldInfo.getName().equals(actSpecLink.getName()) || !oldInfo.getUrl().equals(actSpecLink.getUrl()) || (!ObjectUtils.isEmpty(actSpecLink.getShowImage()) && !actSpecLink.getShowImage().equals(oldInfo.getShowImage()))) {
+        if (!ObjectUtils.isEmpty(actSpecLink.getBindActCode())||(!ObjectUtils.isEmpty(actSpecLink.getTime())) || !oldInfo.getName().equals(actSpecLink.getName()) || !oldInfo.getUrl().equals(actSpecLink.getUrl()) || (!ObjectUtils.isEmpty(actSpecLink.getShowImage()) && !actSpecLink.getShowImage().equals(oldInfo.getShowImage()))) {
             //修改了名称或者url，需要清除所有缓存
             List<String> time = actSpecLink.getTime();
             if (!ObjectUtils.isEmpty(time) && time.size() == 2) {

@@ -20,6 +20,7 @@ import com.red.star.macalline.act.admin.exception.EntityExistException;
 import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
 import com.red.star.macalline.act.admin.mapper.ActSpecLinkMybatisMapper;
 import com.red.star.macalline.act.admin.mapper.MallMybatisMapper;
+import com.red.star.macalline.act.admin.mapper.MallSpecLinkMybatisMapper;
 import com.red.star.macalline.act.admin.repository.MallRepository;
 import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.MallService;
@@ -79,6 +80,10 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
 
     @Resource
     private ActModuleService actModuleService;
+
+    @Resource
+    private MallSpecLinkMybatisMapper mallSpecLinkMybatisMapper;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MallServiceImpl.class);
 
@@ -279,7 +284,18 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
             return ActResponse.buildErrorResponse("参数有误");
         }
         mallMybatisMapper.updateActMallMerge(actCode, mallList);
+        //判断是否同时为广告位 如果是，则同步更新广告位内的商场
+       /* List<ActSpecLink> actSpecLinks = actSpecLinkMybatisMapper.selectList(new QueryWrapper<ActSpecLink>().eq("bind_act_code", actCode));
+        if (!ObjectUtils.isEmpty(actSpecLinks)) {
+            for (ActSpecLink actSpecLink:actSpecLinks){
+                for (Mall mall : mallList) {
+                    MallSpecLink mallSpecLink=new MallSpecLink();
+                    mallSpecLink.setIsShow(mall.getIsJoin());
+                    mallSpecLinkMybatisMapper.update(mallSpecLink, new UpdateWrapper<MallSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
+                }
+            }
 
+        }*/
         //清除一下缓存
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ACT + actCode);
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME + actCode);

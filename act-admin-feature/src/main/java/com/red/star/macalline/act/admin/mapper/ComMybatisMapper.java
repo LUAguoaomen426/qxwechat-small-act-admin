@@ -1,9 +1,8 @@
 package com.red.star.macalline.act.admin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.red.star.macalline.act.admin.domain.bo.FlopBo;
 import com.red.star.macalline.act.admin.domain.bo.LuckyBo;
-import com.red.star.macalline.act.admin.domain.bo.FlopBo;
-import com.red.star.macalline.act.admin.domain.bo.FlopBo;
 import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
 import com.red.star.macalline.act.admin.domain.vo.FlopVo;
 import com.red.star.macalline.act.admin.domain.vo.LuckyVo;
@@ -63,4 +62,5 @@ public interface ComMybatisMapper extends BaseMapper {
      * @return
      */
     SourcePvUvVo analysisPVUV(@Param("sourcePvUvBo") SourcePvUvBo sourcePvUvBo1);
+
 }
