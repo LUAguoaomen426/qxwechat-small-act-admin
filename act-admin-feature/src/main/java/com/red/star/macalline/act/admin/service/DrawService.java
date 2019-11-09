@@ -491,6 +491,8 @@ public class DrawService {
                 } else {
                     luckyList.add(e);
                 }
+            } else {
+                luckyList.add(e);
             }
         });
         return new LuckyData(luckyList, gradeMap);
