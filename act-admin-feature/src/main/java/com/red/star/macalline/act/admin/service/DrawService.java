@@ -431,6 +431,16 @@ public class DrawService {
         return flag;
     }
 
+    public Boolean octoberMall(String omsCode) {
+        String canLotteryList = "1097,1330,1121,1098,1099,1088,1087,3014,1025,1187,1294,1126,1275,1217,1022,1164,1011,1283,1037,1255,1245,1128,1040,4897,1202,1201,1205,1207,1246,1101,1206,1227,1115,1062,1209,1061,1138,1244,1271,1063,1052,1230,1220,1215,1119,1213,1005,1169,1001,1113,1009,1043,1322,3091,1048,1287,1010,1015,1084,1071,1072,1075,1074,1073,1190,1272,1067,1065,1066";
+        List<String> mallList = Lists.newArrayList(canLotteryList.split(","));
+        Boolean flag = false;
+        if (!ObjectUtils.isEmpty(omsCode)) {
+            flag = mallList.contains(omsCode);
+        }
+        return flag;
+    }
+
     public LuckyData analysisLuckyData(LuckyBo luckyBo) {
         if (luckyBo.getSource().equals("october")) {
             //十月份大促-查询不同
@@ -469,17 +479,16 @@ public class DrawService {
         List<LuckyVo> luckyList = Lists.newArrayList();
         List<LuckyVo> luckyVoList = comMybatisMapper.analysisLuckyData(luckyBo);
         luckyVoList.forEach(e -> {
-//            Boolean mallFlag = judgeMall(e.getOmsCode());
-            e.setMallFlag(true);
-            e.setGradeName(e.getGrade()+"元免单券");
-//            if (null != luckyBo.getMallFlag()) {
-//                if (mallFlag.equals(luckyBo.getMallFlag())) {
-//                    luckyList.add(e);
-//                }
-//            } else {
-//                luckyList.add(e);
-//            }
-            luckyList.add(e);
+            Boolean mallFlag = octoberMall(e.getOmsCode());
+            e.setMallFlag(mallFlag);
+            e.setGradeName(e.getGrade() + "元免单券");
+            if (null != luckyBo.getMallFlag()) {
+                if (mallFlag.equals(luckyBo.getMallFlag())) {
+                    luckyList.add(e);
+                }
+            } else {
+                luckyList.add(e);
+            }
         });
         return new LuckyData(luckyList, gradeMap);
     }
