@@ -469,16 +469,17 @@ public class DrawService {
         List<LuckyVo> luckyList = Lists.newArrayList();
         List<LuckyVo> luckyVoList = comMybatisMapper.analysisLuckyData(luckyBo);
         luckyVoList.forEach(e -> {
-            Boolean mallFlag = judgeMall(e.getOmsCode());
-            e.setMallFlag(mallFlag);
+//            Boolean mallFlag = judgeMall(e.getOmsCode());
+            e.setMallFlag(true);
             e.setGradeName(e.getGrade()+"元免单券");
-            if (null != luckyBo.getMallFlag()) {
-                if (mallFlag.equals(luckyBo.getMallFlag())) {
-                    luckyList.add(e);
-                }
-            } else {
-                luckyList.add(e);
-            }
+//            if (null != luckyBo.getMallFlag()) {
+//                if (mallFlag.equals(luckyBo.getMallFlag())) {
+//                    luckyList.add(e);
+//                }
+//            } else {
+//                luckyList.add(e);
+//            }
+            luckyList.add(e);
         });
         return new LuckyData(luckyList, gradeMap);
     }
