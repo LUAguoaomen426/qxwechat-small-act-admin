@@ -1,5 +1,6 @@
 package com.red.star.macalline.act.admin.domain.bo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,11 +31,13 @@ public class SourcePvUvBo {
     /**
      * 开始时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date startTime;
 
     /**
      * 结束时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date endTime;
 
     /**
