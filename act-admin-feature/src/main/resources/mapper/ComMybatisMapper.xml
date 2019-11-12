@@ -56,7 +56,8 @@
         u.mobile,
         e.create_time time,
         e.ticket_grade grade,
-        e.type
+        e.type,
+        e.ticket_info
         FROM tb_wap_event e
         LEFT JOIN tb_wap_user u ON u.vip_id = e.vip_id
         LEFT JOIN tb_wap_mall m ON m.oms_code = e.oms_code

@@ -58,6 +58,8 @@ public class DrawService {
     @Resource
     private ComService comService;
 
+    private Set<String> octoberMallSet = new HashSet<>();
+
     /**
      * 获取抽奖信息详细信息
      *
@@ -432,11 +434,14 @@ public class DrawService {
     }
 
     public Boolean octoberMall(String omsCode) {
-        String canLotteryList = "1097,1330,1121,1098,1099,1088,1087,3014,1025,1187,1294,1126,1275,1217,1022,1164,1011,1283,1037,1255,1245,1128,1040,4897,1202,1201,1205,1207,1246,1101,1206,1227,1115,1062,1209,1061,1138,1244,1271,1063,1052,1230,1220,1215,1119,1213,1005,1169,1001,1113,1009,1043,1322,3091,1048,1287,1010,1015,1084,1071,1072,1075,1074,1073,1190,1272,1067,1065,1066";
-        List<String> mallList = Lists.newArrayList(canLotteryList.split(","));
+        if(ObjectUtils.isEmpty(octoberMallSet)) {
+            String canLotteryList = "1097,1330,1121,1098,1099,1088,1087,3014,1025,1187,1294,1126,1275,1217,1022,1164,1011,1283,1037,1255,1245,1128,1040,4897,1202,1201,1205,1207,1246,1101,1206,1227,1115,1062,1209,1061,1138,1244,1271,1063,1052,1230,1220,1215,1119,1213,1005,1169,1001,1113,1009,1043,1322,3091,1048,1287,1010,1015,1084,1071,1072,1075,1074,1073,1190,1272,1067,1065,1066";
+            List<String> mallList = Lists.newArrayList(canLotteryList.split(","));
+            octoberMallSet.addAll(mallList);
+        }
         Boolean flag = false;
         if (!ObjectUtils.isEmpty(omsCode)) {
-            flag = mallList.contains(omsCode);
+            flag = octoberMallSet.contains(omsCode);
         }
         return flag;
     }
@@ -481,7 +486,8 @@ public class DrawService {
         luckyVoList.forEach(e -> {
             Boolean mallFlag = octoberMall(e.getOmsCode());
             e.setMallFlag(mallFlag);
-            e.setGradeName(e.getGrade() + "元免单券");
+            JSONObject ticketInfo = JSONObject.parseObject(e.getTicketInfo());
+            e.setGradeName(e.getGrade() + "元免单券 "+"("+ ((Integer) ticketInfo.get("omsType") == 1 ?"龙翼券":"喵零券")+")");
             if (null != luckyBo.getMallFlag()) {
                 if (mallFlag.equals(luckyBo.getMallFlag())) {
                     luckyList.add(e);

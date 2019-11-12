@@ -39,4 +39,9 @@ public class LuckyVo {
     private String gradeName;
 
     private String type;
+
+    /**
+     * 领取的券信息
+     */
+    private String ticketInfo;
 }
