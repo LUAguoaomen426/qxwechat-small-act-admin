@@ -1,6 +1,6 @@
 package com.red.star.macalline.act.admin.rest;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.red.star.macalline.act.admin.aop.log.Log;
 import com.red.star.macalline.act.admin.domain.SignUpForm;
 import com.red.star.macalline.act.admin.domain.bo.FlopBo;
@@ -9,9 +9,13 @@ import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
 import com.red.star.macalline.act.admin.domain.vo.*;
 import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.DrawService;
+import com.red.star.macalline.act.admin.service.ReportService;
+import com.red.star.macalline.act.admin.service.dto.BtnDailyReportQueryCriteria;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +44,9 @@ public class ReportController {
 
     @Resource
     private DrawService drawService;
+
+    @Resource
+    private ReportService reportService;
 
     @Log("活动pv、uv")
     @ApiOperation(value = "活动pv、uv")
@@ -71,7 +78,7 @@ public class ReportController {
     @ApiOperation(value = "添加单品券额外人数")
     @PreAuthorize("hasAnyRole('ADMIN','REPORT_ALL','REPORT_ACT_TICKET_ADD')")
     @PostMapping("/addTicketNumber")
-    public ActResponse addTicketNumber(String source,@RequestBody @Valid ActExtraNumber actExtraNumber) throws IOException {
+    public ActResponse addTicketNumber(String source, @RequestBody @Valid ActExtraNumber actExtraNumber) throws IOException {
         actModuleService.changeTicketNumber(source, actExtraNumber);
         return ActResponse.buildSuccessResponse();
     }
@@ -104,6 +111,14 @@ public class ReportController {
         }
         List<Map> actGroupVO = actModuleService.findGroupCountBySource(source);
         return ActResponse.buildSuccessResponse(actGroupVO);
+    }
+
+    @Log("每日按钮点击报表")
+    @ApiOperation(value = "查询每日按钮点击报表")
+    @GetMapping(value = "/btnDaily")
+    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_BTN_DAILY')")
+    public ResponseEntity btnDaily(BtnDailyReportQueryCriteria criteria, Page page) {
+        return new ResponseEntity(reportService.queryAll(criteria, page), HttpStatus.OK);
     }
 
     public ActResponse findSignUp(SignUpForm formData){
