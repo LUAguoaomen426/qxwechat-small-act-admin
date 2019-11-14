@@ -1,6 +1,8 @@
 package com.red.star.macalline.act.admin.rest;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.red.star.macalline.act.admin.aop.log.Log;
+import com.red.star.macalline.act.admin.domain.SignUpForm;
 import com.red.star.macalline.act.admin.domain.bo.FlopBo;
 import com.red.star.macalline.act.admin.domain.bo.LuckyBo;
 import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
@@ -102,5 +104,10 @@ public class ReportController {
         }
         List<Map> actGroupVO = actModuleService.findGroupCountBySource(source);
         return ActResponse.buildSuccessResponse(actGroupVO);
+    }
+
+    public ActResponse findSignUp(SignUpForm formData){
+        return null;
+
     }
 }
