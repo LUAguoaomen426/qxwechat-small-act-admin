@@ -3,6 +3,7 @@ package com.red.star.macalline.act.admin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.red.star.macalline.act.admin.domain.ActReportBtnDaily;
 import com.red.star.macalline.act.admin.domain.ActReportDict;
@@ -24,6 +25,7 @@ import javax.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author AMGuo
@@ -46,9 +48,24 @@ public class ReportServiceImpl implements ReportService {
         QueryWrapper<ActReportBtnDaily> qryWrapper = new QueryWrapper<>();
         qryWrapper
                 .eq("t.source", criteria.getSource())
+                .ne("tr.pid", 170)
                 .orderBy(true, false, "t.id");
-        if (!ObjectUtils.isEmpty(criteria.getDictId())) {
-            qryWrapper.eq("tr.id", criteria.getDictId());
+        if (!ObjectUtils.isEmpty(criteria.getDictIdStr())) {
+            String[] split = criteria.getDictIdStr().split(",");
+            List<String> list = Lists.newArrayList(split);
+            for (String s : split) {
+                List<ActReportDict> actReportDictList = findByPid(Integer.valueOf(s));
+                if (!ObjectUtils.isEmpty(actReportDictList)) {
+                    List<String> collect = actReportDictList.stream()
+                            .map(actReportDict -> String.valueOf(actReportDict.getId()))
+                            .collect(Collectors.toList());
+                    list.addAll(collect);
+                }
+            }
+            if (!ObjectUtils.isEmpty(list)) {
+                qryWrapper.and(qw -> qw.in("tr.id", list)
+                        .or().in("tr.pid", list));
+            }
         }
         if (!ObjectUtils.isEmpty(criteria.getDataDateStart()) && !ObjectUtils.isEmpty(criteria.getDataDateEnd())) {
             qryWrapper.between("t.data_date", criteria.getDataDateStart(), criteria.getDataDateEnd());

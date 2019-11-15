@@ -5,6 +5,7 @@
     <select id="queryListByPage" resultType="com.red.star.macalline.act.admin.service.dto.BtnDailyReportDTO">
         SELECT tr.id dictId,
         tr.label dictLabel,
+        tr.ext_1,
         t.*
         FROM tb_report_act_btn_daily t
         JOIN tb_report_act_dict tr ON t.module_name = tr.`value`

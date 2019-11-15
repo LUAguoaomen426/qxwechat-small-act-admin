@@ -32,6 +32,9 @@ public class BtnDailyReportDTO implements Serializable {
     // 模块名称
     private String moduleName;
 
+    // 扩展字段
+    private String ext1;
+
     // 展示图片
     private Long pv;
 
