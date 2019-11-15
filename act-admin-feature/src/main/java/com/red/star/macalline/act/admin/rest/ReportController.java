@@ -119,4 +119,12 @@ public class ReportController {
     public ResponseEntity btnDaily(BtnDailyReportQueryCriteria criteria, Page page) {
         return new ResponseEntity(reportService.queryAll(criteria, page), HttpStatus.OK);
     }
+
+    @Log("报表的字典表")
+    @ApiOperation(value = "报表的字典表")
+    @GetMapping(value = "/report/dict/tree")
+    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_DICT_TREE')")
+    public ResponseEntity getTree() {
+        return new ResponseEntity(reportService.getDictTree(reportService.findByPid(0)), HttpStatus.OK);
+    }
 }

@@ -3,8 +3,11 @@ package com.red.star.macalline.act.admin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.common.collect.Maps;
 import com.red.star.macalline.act.admin.domain.ActReportBtnDaily;
+import com.red.star.macalline.act.admin.domain.ActReportDict;
 import com.red.star.macalline.act.admin.mapper.ActReportBtnDailyMybatisMapper;
+import com.red.star.macalline.act.admin.mapper.ActReportDictMybatisMapper;
 import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.ReportService;
 import com.red.star.macalline.act.admin.service.dto.BtnDailyReportDTO;
@@ -18,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,20 +38,49 @@ public class ReportServiceImpl implements ReportService {
     @Resource
     private ActReportBtnDailyMybatisMapper reportBtnDailyMybatisMapper;
 
+    @Resource
+    private ActReportDictMybatisMapper reportDictMybatisMapper;
+
     @Override
     public Map<String, Object> queryAll(BtnDailyReportQueryCriteria criteria, Page page) {
         QueryWrapper<ActReportBtnDaily> qryWrapper = new QueryWrapper<>();
         qryWrapper
                 .eq("t.source", criteria.getSource())
                 .orderBy(true, false, "t.id");
-        if (!ObjectUtils.isEmpty(criteria.getModuleName())) {
-            qryWrapper.like("t.module_name", criteria.getModuleName());
+        if (!ObjectUtils.isEmpty(criteria.getDictId())) {
+            qryWrapper.eq("tr.id", criteria.getDictId());
         }
         if (!ObjectUtils.isEmpty(criteria.getDataDateStart()) && !ObjectUtils.isEmpty(criteria.getDataDateEnd())) {
             qryWrapper.between("t.data_date", criteria.getDataDateStart(), criteria.getDataDateEnd());
         }
         Page<BtnDailyReportDTO> reportBtnDailyIPage = reportBtnDailyMybatisMapper.queryListByPage(page, qryWrapper);
         return PageMybatisUtil.toPage(reportBtnDailyIPage);
+    }
+
+    @Override
+    public List<ActReportDict> findByPid(int pid) {
+        List<ActReportDict> actReportDictList = reportDictMybatisMapper.selectList(new LambdaQueryWrapper<ActReportDict>()
+                .eq(ActReportDict::getPid, pid));
+        return actReportDictList;
+    }
+
+    @Override
+    public Object getDictTree(List<ActReportDict> dataList) {
+        List<Map<String, Object>> list = new LinkedList<>();
+        dataList.forEach(entity -> {
+                    if (entity != null) {
+                        List<ActReportDict> permissionList = findByPid(entity.getId());
+                        Map<String, Object> map = Maps.newHashMap();
+                        map.put("id", entity.getId());
+                        map.put("label", entity.getLabel());
+                        if (permissionList != null && permissionList.size() != 0) {
+                            map.put("children", getDictTree(permissionList));
+                        }
+                        list.add(map);
+                    }
+                }
+        );
+        return list;
     }
 
 }
