@@ -83,16 +83,6 @@
         order by m.province, m.city, m.oms_code
     </select>
 
-    <update id="updateActMallMerge">
-        <foreach collection="mallList" item="list" separator=";">
-            update tb_wap_act_mall_merge
-            set is_join = #{list.isJoin},
-            update_time = now()
-            where oms_code=#{list.omsCode}
-            and act_code = #{actCode}
-        </foreach>
-    </update>
-
     <update id="updateActMallDefultEnableByCity">
         update tb_wap_mall
            set default_enable = 0

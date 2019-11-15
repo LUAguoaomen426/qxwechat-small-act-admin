@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAsync
 @SpringBootApplication
 @EnableTransactionManagement
-@MapperScan("com.red.star.macalline.act.admin.mapper")
+@MapperScan(basePackages = "com.red.star.macalline.act.admin.mapper")
 public class AppRun {
 
     public static void main(String[] args) {
