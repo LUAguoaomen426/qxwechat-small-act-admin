@@ -16,7 +16,7 @@
 			s.sub_channel,
 			s.page_url,
 			s.cli_type,
-			s.from_openid,
+			s.from_open_id,
 			s.from_union_id,
 			s.scene,
 			d.label type,

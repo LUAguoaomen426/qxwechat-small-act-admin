@@ -72,6 +72,8 @@ public class ReportServiceImpl implements ReportService {
     public Map<String, Object> querySignUpReportData(SignUpQueryCriteria criteria, Page page) throws ParseException {
         QueryWrapper<SignUp> wrapper = new QueryWrapper<>();
 
+        List<ActReportDict> decSuper = reportDictMybatisMapper.findSonByParentIdAndSource("action-sign-up", "decSuper");
+
         if(!ObjectUtils.isEmpty(criteria.getStartTime()) && !ObjectUtils.isEmpty(criteria.getEndTime()))
             wrapper.between("s.update_time",DateNewUtil.parseIsoString(criteria.getStartTime()),DateNewUtil.parseIsoString(criteria.getEndTime()));
         if(!ObjectUtils.isEmpty(criteria.getName()))
