@@ -2,6 +2,7 @@ package com.red.star.macalline.act.admin.rest;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.red.star.macalline.act.admin.aop.log.Log;
+import com.red.star.macalline.act.admin.domain.SignUpForm;
 import com.red.star.macalline.act.admin.domain.bo.FlopBo;
 import com.red.star.macalline.act.admin.domain.bo.LuckyBo;
 import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
@@ -118,6 +119,11 @@ public class ReportController {
     @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_BTN_DAILY')")
     public ResponseEntity btnDaily(BtnDailyReportQueryCriteria criteria, Page page) {
         return new ResponseEntity(reportService.queryAll(criteria, page), HttpStatus.OK);
+    }
+
+    public ActResponse findSignUp(SignUpForm formData){
+        return null;
+
     }
 
     @Log("报表的字典表")
