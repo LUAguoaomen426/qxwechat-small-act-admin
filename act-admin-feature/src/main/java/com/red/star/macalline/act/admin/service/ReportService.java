@@ -3,8 +3,11 @@ package com.red.star.macalline.act.admin.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.red.star.macalline.act.admin.domain.ActReportDict;
 import com.red.star.macalline.act.admin.service.dto.BtnDailyReportQueryCriteria;
+import com.red.star.macalline.act.admin.service.dto.SignUpQueryCriteria;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.cache.annotation.Cacheable;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +28,19 @@ public interface ReportService {
     @Cacheable(value = "imp:act:admin:report")
     Map<String, Object> queryAll(BtnDailyReportQueryCriteria criteria, Page page);
 
+    /**
+     * 留资表单参数
+     * @return
+     */
+    Map<String,Object> getSignUpFormParam(String source);
+
+    /**
+     *  查询留资信息
+     * @param criteria
+     * @param page
+     * @return
+     */
+    Map<String,Object> querySignUpReportData(SignUpQueryCriteria criteria, Page page) throws ParseException;
     /**
      * findByPid
      *

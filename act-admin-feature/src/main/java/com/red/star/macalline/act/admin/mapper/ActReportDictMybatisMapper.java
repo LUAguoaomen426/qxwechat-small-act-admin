@@ -2,6 +2,9 @@ package com.red.star.macalline.act.admin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.red.star.macalline.act.admin.domain.ActReportDict;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @ProjectName: qxwechat-small-act-admin
@@ -13,4 +16,5 @@ import com.red.star.macalline.act.admin.domain.ActReportDict;
  */
 public interface ActReportDictMybatisMapper extends BaseMapper<ActReportDict> {
 
+    List<ActReportDict> findSonByParentIdAndSource(@Param("value") String value,@Param("source") String source);
 }

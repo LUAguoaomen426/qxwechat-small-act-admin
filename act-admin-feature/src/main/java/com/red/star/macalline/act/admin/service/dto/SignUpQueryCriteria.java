@@ -1,4 +1,4 @@
-package com.red.star.macalline.act.admin.domain;
+package com.red.star.macalline.act.admin.service.dto;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -16,15 +16,16 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SignUpForm {
+public class SignUpQueryCriteria {
     private String name;
     private String mobile;
     private String mallCondition;
     private String type;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date startTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date endTime;
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private String startTime;
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private String endTime;
     private Integer cliType;
     private String scene;
+    private String source;
 }
