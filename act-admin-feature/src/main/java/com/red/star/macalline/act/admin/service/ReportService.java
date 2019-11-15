@@ -1,12 +1,14 @@
 package com.red.star.macalline.act.admin.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.red.star.macalline.act.admin.domain.ActReportDict;
 import com.red.star.macalline.act.admin.service.dto.BtnDailyReportQueryCriteria;
 import com.red.star.macalline.act.admin.service.dto.SignUpQueryCriteria;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.cache.annotation.Cacheable;
 
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,4 +35,21 @@ public interface ReportService {
      * @return
      */
     Map<String,Object> querySignUpReportData(SignUpQueryCriteria criteria, Page page) throws ParseException;
+    /**
+     * findByPid
+     *
+     * @param pid
+     * @return
+     */
+    @Cacheable(value = "imp:act:admin:report:dict", key = "'pid:'+#p0")
+    List<ActReportDict> findByPid(int pid);
+
+    /**
+     * 查询字典树
+     *
+     * @param byPid
+     * @return
+     */
+    @Cacheable(value = "imp:act:admin:report:dict", key = "'tree'")
+    Object getDictTree(List<ActReportDict> byPid);
 }
