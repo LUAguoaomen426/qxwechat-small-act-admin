@@ -69,10 +69,17 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public Map<String, Object> getSignUpFormParam(String source) {
+        HashMap<String, Object> res = new HashMap<>();
+        List<ActReportDict> types = reportDictMybatisMapper.findSonByParentIdAndSource("action-sign-up", source);
+        res.put("types",types);
+        return res;
+    }
+
+    @Override
     public Map<String, Object> querySignUpReportData(SignUpQueryCriteria criteria, Page page) throws ParseException {
         QueryWrapper<SignUp> wrapper = new QueryWrapper<>();
 
-        List<ActReportDict> decSuper = reportDictMybatisMapper.findSonByParentIdAndSource("action-sign-up", "decSuper");
 
         if(!ObjectUtils.isEmpty(criteria.getStartTime()) && !ObjectUtils.isEmpty(criteria.getEndTime()))
             wrapper.between("s.update_time",DateNewUtil.parseIsoString(criteria.getStartTime()),DateNewUtil.parseIsoString(criteria.getEndTime()));
@@ -88,6 +95,7 @@ public class ReportServiceImpl implements ReportService {
             wrapper.like("s.mobile",criteria.getMobile());
         if(!ObjectUtils.isEmpty(criteria.getScene()))
             wrapper.like("s.scene",criteria.getScene());
+        wrapper.eq("s.source",criteria.getSource());
         Page<SignUp> listByPage = signUpMapper.findListByPage(page,wrapper);
 
         return PageMybatisUtil.toPage(listByPage);

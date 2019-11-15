@@ -122,6 +122,14 @@ public class ReportController {
         return new ResponseEntity(reportService.queryAll(criteria, page), HttpStatus.OK);
     }
 
+    @Log("留资Form表单参数")
+    @ApiOperation(value = "留资表单部分参数获取")
+    @GetMapping(value = "/signUpFormParam/{source}")
+    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_BTN_DAILY')")
+    public ResponseEntity getSignUpForm(@PathVariable String source){
+        return new ResponseEntity(reportService.getSignUpFormParam(source),HttpStatus.OK);
+    }
+
     @Log("留资报表")
     @ApiOperation(value = "留资报表数据获取")
     @GetMapping(value = "/signUpData")

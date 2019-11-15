@@ -29,7 +29,13 @@ public interface ReportService {
     Map<String, Object> queryAll(BtnDailyReportQueryCriteria criteria, Page page);
 
     /**
-     *
+     * 留资表单参数
+     * @return
+     */
+    Map<String,Object> getSignUpFormParam(String source);
+
+    /**
+     *  查询留资信息
      * @param criteria
      * @param page
      * @return
