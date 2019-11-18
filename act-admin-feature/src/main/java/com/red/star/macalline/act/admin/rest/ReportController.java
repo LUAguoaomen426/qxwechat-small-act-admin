@@ -132,11 +132,11 @@ public class ReportController {
 
     @Log("留资报表")
     @ApiOperation(value = "留资报表数据获取")
-    @GetMapping(value = "/signUpData")
+    @GetMapping(value = "/signUpData/{source}")
     @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_BTN_DAILY')")
-    public ResponseEntity findSignUp(SignUpQueryCriteria criteria, Page page) throws ParseException {
+    public ResponseEntity findSignUp(SignUpQueryCriteria criteria, Page page,@PathVariable String source) throws ParseException {
 
-        return new ResponseEntity(reportService.querySignUpReportData(criteria,page),HttpStatus.OK);
+        return new ResponseEntity(reportService.querySignUpReportData(source,criteria,page),HttpStatus.OK);
 
     }
 

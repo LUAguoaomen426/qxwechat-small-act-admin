@@ -89,31 +89,33 @@ public class ReportServiceImpl implements ReportService {
     public Map<String, Object> getSignUpFormParam(String source) {
         HashMap<String, Object> res = new HashMap<>();
         List<ActReportDict> types = reportDictMybatisMapper.findSonByParentIdAndSource("action-sign-up", source);
-        res.put("types",types);
+        res.put("types", types);
         return res;
     }
 
     @Override
-    public Map<String, Object> querySignUpReportData(SignUpQueryCriteria criteria, Page page) throws ParseException {
+    public Map<String, Object> querySignUpReportData(String source, SignUpQueryCriteria criteria, Page page) throws ParseException {
         QueryWrapper<SignUp> wrapper = new QueryWrapper<>();
 
 
-        if(!ObjectUtils.isEmpty(criteria.getStartTime()) && !ObjectUtils.isEmpty(criteria.getEndTime()))
-            wrapper.between("s.update_time",DateNewUtil.parseIsoString(criteria.getStartTime()),DateNewUtil.parseIsoString(criteria.getEndTime()));
-        if(!ObjectUtils.isEmpty(criteria.getName()))
-            wrapper.eq("s.name",criteria.getName());
+        if (!ObjectUtils.isEmpty(criteria.getStartTime()) && !ObjectUtils.isEmpty(criteria.getEndTime()))
+            wrapper.between("s.update_time", DateNewUtil.parseIsoString(criteria.getStartTime()), DateNewUtil.parseIsoString(criteria.getEndTime()));
         if (!ObjectUtils.isEmpty(criteria.getCliType()))
-            wrapper.eq("s.cli_type",criteria.getCliType());
-        if(!ObjectUtils.isEmpty(criteria.getType()))
-            wrapper.eq("s.type",criteria.getType());
+            wrapper.eq("s.cli_type", criteria.getCliType());
+        if (!ObjectUtils.isEmpty(criteria.getType()))
+            wrapper.eq("s.type", criteria.getType());
+
+        if (!ObjectUtils.isEmpty(criteria.getName()))
+            wrapper.like("s.name", criteria.getName());
         if (!ObjectUtils.isEmpty(criteria.getMallCondition()))
-            wrapper.like("m.mall_name",criteria.getMallCondition());
-        if(!ObjectUtils.isEmpty(criteria.getMobile()))
-            wrapper.like("s.mobile",criteria.getMobile());
-        if(!ObjectUtils.isEmpty(criteria.getScene()))
-            wrapper.like("s.scene",criteria.getScene());
-        wrapper.eq("s.source",criteria.getSource());
-        Page<SignUp> listByPage = signUpMapper.findListByPage(page,wrapper);
+            wrapper.like("m.mall_name", criteria.getMallCondition());
+        if (!ObjectUtils.isEmpty(criteria.getMobile()))
+            wrapper.like("s.mobile", criteria.getMobile());
+        if (!ObjectUtils.isEmpty(criteria.getScene()))
+            wrapper.like("s.scene", criteria.getScene());
+
+        wrapper.eq("s.source", source);
+        Page<SignUp> listByPage = signUpMapper.findListByPage(page, wrapper);
 
         return PageMybatisUtil.toPage(listByPage);
     }

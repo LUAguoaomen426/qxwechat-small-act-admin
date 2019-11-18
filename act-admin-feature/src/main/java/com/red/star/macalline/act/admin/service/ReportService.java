@@ -32,6 +32,7 @@ public interface ReportService {
      * 留资表单参数
      * @return
      */
+    @Cacheable(value = "imp:act:admin:report:signUp:form",key = "#source")
     Map<String,Object> getSignUpFormParam(String source);
 
     /**
@@ -40,7 +41,7 @@ public interface ReportService {
      * @param page
      * @return
      */
-    Map<String,Object> querySignUpReportData(SignUpQueryCriteria criteria, Page page) throws ParseException;
+    Map<String,Object> querySignUpReportData(String source,SignUpQueryCriteria criteria, Page page) throws ParseException;
     /**
      * findByPid
      *
