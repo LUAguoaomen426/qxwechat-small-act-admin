@@ -125,7 +125,7 @@ public class ReportController {
     @Log("留资Form表单参数")
     @ApiOperation(value = "留资表单部分参数获取")
     @GetMapping(value = "/signUpFormParam/{source}")
-    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_BTN_DAILY')")
+    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_SIGN_UP')")
     public ResponseEntity getSignUpForm(@PathVariable String source){
         return new ResponseEntity(reportService.getSignUpFormParam(source),HttpStatus.OK);
     }
@@ -133,7 +133,7 @@ public class ReportController {
     @Log("留资报表")
     @ApiOperation(value = "留资报表数据获取")
     @GetMapping(value = "/signUpData/{source}")
-    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_BTN_DAILY')")
+    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_SIGN_UP')")
     public ResponseEntity findSignUp(SignUpQueryCriteria criteria, Page page,@PathVariable String source) throws ParseException {
 
         return new ResponseEntity(reportService.querySignUpReportData(source,criteria,page),HttpStatus.OK);
