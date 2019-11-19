@@ -195,7 +195,7 @@ public class DrawService {
         Integer dayNum = (int) ((drawVO.getDrawEndTime().getTime() - drawVO.getDrawStartTime().getTime()) / (24 * 60 * 60 * 1000)) + 1;
         DrawElement[][] martix = new DrawElement[dayNum][drawVO.getPrizeCount()];
         List<Map<String, Object>> tableDraw = drawVO.getTableDraw();
-        BigDecimal hundred = new BigDecimal("100");
+        BigDecimal MULRIPLE = new BigDecimal("1000");
 
         List<Map<String, String>> ticketNumList = new ArrayList<>();
 
@@ -212,8 +212,8 @@ public class DrawService {
                 Map eDate = (Map) row.get(String.valueOf(j + 1));
                 element.setPrizeCount(Integer.parseInt(eDate.get("prizeCount").toString()));
                 element.setPrizeProbability(eDate.get("prizeProbability").toString());
-                //生成抽奖随机数范围
-                Integer end = new BigDecimal(element.getPrizeProbability()).multiply(hundred).intValue();
+                //生成抽奖随机数范围  probability为百分比，直接x1000 即为100000的倍数
+                Integer end = new BigDecimal(element.getPrizeProbability()).multiply(MULRIPLE).intValue();
                 element.setDrawValueEnd(beforeNum + end);
                 element.setDrawValueHead(beforeNum + 1);
                 beforeNum += end;
@@ -242,7 +242,8 @@ public class DrawService {
         if (ObjectUtils.isEmpty(oldDrawInfo)) {
             return ActResponse.buildErrorResponse("查询不到对应抽奖信息");
         }
-        Date now = new Date();
+        Date now = DateNewUtil.today();
+
         String drawKey = CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_DRAW + drawVo.getId();
 
         Map map = parseDrawVO(drawVo);
@@ -272,7 +273,7 @@ public class DrawService {
                 SimpleDateFormat drawDateFormate = new SimpleDateFormat("yyy-MM-dd");
                 Date drawDate = drawDateFormate.parse(date);
                 if (now.compareTo(drawDate) == -1) {
-                    //当前时间还未开始抽奖，每天库存数量保留
+                    //当前循环时间还未开始抽奖，每天库存数量更新
                     needChange.put(e.getKey(), e.getValue());
                 }
             }
