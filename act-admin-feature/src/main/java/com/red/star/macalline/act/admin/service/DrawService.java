@@ -195,7 +195,7 @@ public class DrawService {
         Integer dayNum = (int) ((drawVO.getDrawEndTime().getTime() - drawVO.getDrawStartTime().getTime()) / (24 * 60 * 60 * 1000)) + 1;
         DrawElement[][] martix = new DrawElement[dayNum][drawVO.getPrizeCount()];
         List<Map<String, Object>> tableDraw = drawVO.getTableDraw();
-        BigDecimal hundred = new BigDecimal("100");
+        BigDecimal MULRIPLE = new BigDecimal("1000");
 
         List<Map<String, String>> ticketNumList = new ArrayList<>();
 
@@ -212,8 +212,8 @@ public class DrawService {
                 Map eDate = (Map) row.get(String.valueOf(j + 1));
                 element.setPrizeCount(Integer.parseInt(eDate.get("prizeCount").toString()));
                 element.setPrizeProbability(eDate.get("prizeProbability").toString());
-                //生成抽奖随机数范围
-                Integer end = new BigDecimal(element.getPrizeProbability()).multiply(hundred).intValue();
+                //生成抽奖随机数范围  probability为百分比，直接x1000 即为100000的倍数
+                Integer end = new BigDecimal(element.getPrizeProbability()).multiply(MULRIPLE).intValue();
                 element.setDrawValueEnd(beforeNum + end);
                 element.setDrawValueHead(beforeNum + 1);
                 beforeNum += end;
