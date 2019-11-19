@@ -1,7 +1,7 @@
 server:
   port: 9200
   servlet:
-    context-path: /act_admin_api
+    context-path: /act-admin-api
 
 #配置数据源
 spring:
