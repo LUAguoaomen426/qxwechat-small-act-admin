@@ -273,7 +273,7 @@ public class DrawService {
                 SimpleDateFormat drawDateFormate = new SimpleDateFormat("yyy-MM-dd");
                 Date drawDate = drawDateFormate.parse(date);
                 if (now.compareTo(drawDate) == -1) {
-                    //当前时间还未开始抽奖，每天库存数量保留
+                    //当前循环时间还未开始抽奖，每天库存数量更新
                     needChange.put(e.getKey(), e.getValue());
                 }
             }
