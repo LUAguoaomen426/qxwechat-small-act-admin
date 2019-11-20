@@ -242,7 +242,8 @@ public class DrawService {
         if (ObjectUtils.isEmpty(oldDrawInfo)) {
             return ActResponse.buildErrorResponse("查询不到对应抽奖信息");
         }
-        Date now = new Date();
+        Date now = DateNewUtil.today();
+
         String drawKey = CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_DRAW + drawVo.getId();
 
         Map map = parseDrawVO(drawVo);
