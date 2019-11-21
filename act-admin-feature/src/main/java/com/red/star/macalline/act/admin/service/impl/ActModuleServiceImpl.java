@@ -522,19 +522,15 @@ public class ActModuleServiceImpl implements ActModuleService {
         if (actSpecLink.getMallList().size() > 0) {
             actSpecLinkMybatisMapper.updateSpecLinkMergerByList(actCode, actSpecLink.getSpecCode(), actSpecLink.getMallList());
         }
-        if (!ObjectUtils.isEmpty(actSpecLink.getBindActCode())||(!ObjectUtils.isEmpty(actSpecLink.getTime())) || !oldInfo.getName().equals(actSpecLink.getName()) || !oldInfo.getUrl().equals(actSpecLink.getUrl()) || (!ObjectUtils.isEmpty(actSpecLink.getShowImage()) && !actSpecLink.getShowImage().equals(oldInfo.getShowImage()))) {
-            //修改了名称或者url，需要清除所有缓存
-            List<String> time = actSpecLink.getTime();
-            if (!ObjectUtils.isEmpty(time) && time.size() == 2) {
-                HashMap<Object, Object> map = Maps.newHashMap();
-                map.put("startTime", time.get(0));
-                map.put("endTime", time.get(1));
-                actSpecLink.setTimeLimit(JSON.toJSONString(map));
-            }
-            actSpecLinkMybatisMapper.update(actSpecLink, new UpdateWrapper<ActSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
-            clearSpecLink(actCode, actSpecLink);
-            return ActResponse.buildSuccessResponse("SUCCESS");
+        //修改了名称或者url，需要清除所有缓存
+        List<String> time = actSpecLink.getTime();
+        if (!ObjectUtils.isEmpty(time) && time.size() == 2) {
+            HashMap<Object, Object> map = Maps.newHashMap();
+            map.put("startTime", time.get(0));
+            map.put("endTime", time.get(1));
+            actSpecLink.setTimeLimit(JSON.toJSONString(map));
         }
+        actSpecLinkMybatisMapper.update_NullField(actSpecLink);
         clearSpecLink(actCode, actSpecLink);
         return ActResponse.buildSuccessResponse("SUCCESS");
     }
