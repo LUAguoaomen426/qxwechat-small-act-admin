@@ -517,6 +517,7 @@ public class ActModuleServiceImpl implements ActModuleService {
 
         if (!"T".equals(actSpecLink.getHaveTL())) {
             actSpecLink.setTime(null);
+            actSpecLink.setTimeLimit(null);
         }
         actSpecLink.setMallList(actSpecLink.getChangeMallList());
         if (actSpecLink.getMallList().size() > 0) {
