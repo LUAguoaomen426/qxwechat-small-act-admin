@@ -126,25 +126,25 @@ public class ReportController {
     @ApiOperation(value = "留资表单部分参数获取")
     @GetMapping(value = "/signUpFormParam/{source}")
     @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_SIGN_UP')")
-    public ResponseEntity getSignUpForm(@PathVariable String source){
-        return new ResponseEntity(reportService.getSignUpFormParam(source),HttpStatus.OK);
+    public ResponseEntity getSignUpForm(@PathVariable String source) {
+        return new ResponseEntity(reportService.getSignUpFormParam(source), HttpStatus.OK);
     }
 
     @Log("留资报表")
     @ApiOperation(value = "留资报表数据获取")
     @GetMapping(value = "/signUpData/{source}")
     @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_SIGN_UP')")
-    public ResponseEntity findSignUp(SignUpQueryCriteria criteria, Page page,@PathVariable String source) throws ParseException {
+    public ResponseEntity findSignUp(SignUpQueryCriteria criteria, Page page, @PathVariable String source) throws ParseException {
 
-        return new ResponseEntity(reportService.querySignUpReportData(source,criteria,page),HttpStatus.OK);
+        return new ResponseEntity(reportService.querySignUpReportData(source, criteria, page), HttpStatus.OK);
 
     }
 
     @Log("报表的字典表")
     @ApiOperation(value = "报表的字典表")
-    @GetMapping(value = "/report/dict/tree")
+    @GetMapping(value = "/report/dict/tree/{source}")
     @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_DICT_TREE')")
-    public ResponseEntity getTree() {
-        return new ResponseEntity(reportService.getDictTree(reportService.findByPid(0)), HttpStatus.OK);
+    public ResponseEntity getTree(@PathVariable String source) {
+        return new ResponseEntity(reportService.getDictTree(reportService.findByPid(0, source), source), HttpStatus.OK);
     }
 }

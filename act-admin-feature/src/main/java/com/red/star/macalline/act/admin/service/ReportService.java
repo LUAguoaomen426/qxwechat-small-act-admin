@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.red.star.macalline.act.admin.domain.ActReportDict;
 import com.red.star.macalline.act.admin.service.dto.BtnDailyReportQueryCriteria;
 import com.red.star.macalline.act.admin.service.dto.SignUpQueryCriteria;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.cache.annotation.Cacheable;
 
 import java.text.ParseException;
@@ -46,17 +45,19 @@ public interface ReportService {
      * findByPid
      *
      * @param pid
+     * @param source
      * @return
      */
-    @Cacheable(value = "imp:act:admin:report:dict", key = "'pid:'+#p0")
-    List<ActReportDict> findByPid(int pid);
+    @Cacheable(value = "imp:act:admin:report:dict", key = "'pid:'+#p0+'-source:'+#source")
+    List<ActReportDict> findByPid(int pid, String source);
 
     /**
      * 查询字典树
      *
      * @param byPid
+     * @param source
      * @return
      */
-    @Cacheable(value = "imp:act:admin:report:dict", key = "'tree'")
-    Object getDictTree(List<ActReportDict> byPid);
+    @Cacheable(value = "imp:act:admin:report:dict", key = "'tree'+#source")
+    Object getDictTree(List<ActReportDict> byPid, String source);
 }

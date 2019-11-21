@@ -2,7 +2,6 @@ package com.red.star.macalline.act.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -19,10 +18,8 @@ import com.red.star.macalline.act.admin.service.dto.BtnDailyReportQueryCriteria;
 import com.red.star.macalline.act.admin.service.dto.SignUpQueryCriteria;
 import com.red.star.macalline.act.admin.util.DateNewUtil;
 import com.red.star.macalline.act.admin.utils.PageMybatisUtil;
-import javafx.beans.binding.ObjectExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,7 +62,7 @@ public class ReportServiceImpl implements ReportService {
             String[] split = criteria.getDictIdStr().split(",");
             List<String> list = Lists.newArrayList(split);
             for (String s : split) {
-                List<ActReportDict> actReportDictList = findByPid(Integer.valueOf(s));
+                List<ActReportDict> actReportDictList = findByPid(Integer.valueOf(s), criteria.getSource());
                 if (!ObjectUtils.isEmpty(actReportDictList)) {
                     List<String> collect = actReportDictList.stream()
                             .map(actReportDict -> String.valueOf(actReportDict.getId()))
@@ -98,21 +95,28 @@ public class ReportServiceImpl implements ReportService {
         QueryWrapper<SignUp> wrapper = new QueryWrapper<>();
 
 
-        if (!ObjectUtils.isEmpty(criteria.getStartTime()) && !ObjectUtils.isEmpty(criteria.getEndTime()))
+        if (!ObjectUtils.isEmpty(criteria.getStartTime()) && !ObjectUtils.isEmpty(criteria.getEndTime())) {
             wrapper.between("s.update_time", DateNewUtil.parseIsoString(criteria.getStartTime()), DateNewUtil.parseIsoString(criteria.getEndTime()));
-        if (!ObjectUtils.isEmpty(criteria.getCliType()))
+        }
+        if (!ObjectUtils.isEmpty(criteria.getCliType())) {
             wrapper.eq("s.cli_type", criteria.getCliType());
-        if (!ObjectUtils.isEmpty(criteria.getType()))
+        }
+        if (!ObjectUtils.isEmpty(criteria.getType())) {
             wrapper.eq("s.type", criteria.getType());
+        }
 
-        if (!ObjectUtils.isEmpty(criteria.getName()))
+        if (!ObjectUtils.isEmpty(criteria.getName())) {
             wrapper.like("s.name", criteria.getName());
-        if (!ObjectUtils.isEmpty(criteria.getMallCondition()))
+        }
+        if (!ObjectUtils.isEmpty(criteria.getMallCondition())) {
             wrapper.like("m.mall_name", criteria.getMallCondition());
-        if (!ObjectUtils.isEmpty(criteria.getMobile()))
+        }
+        if (!ObjectUtils.isEmpty(criteria.getMobile())) {
             wrapper.like("s.mobile", criteria.getMobile());
-        if (!ObjectUtils.isEmpty(criteria.getScene()))
+        }
+        if (!ObjectUtils.isEmpty(criteria.getScene())) {
             wrapper.like("s.scene", criteria.getScene());
+        }
 
         wrapper.eq("s.source", source);
         Page<SignUp> listByPage = signUpMapper.findListByPage(page, wrapper);
@@ -121,23 +125,24 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ActReportDict> findByPid(int pid) {
+    public List<ActReportDict> findByPid(int pid, String source) {
         List<ActReportDict> actReportDictList = reportDictMybatisMapper.selectList(new LambdaQueryWrapper<ActReportDict>()
-                .eq(ActReportDict::getPid, pid));
+                .eq(ActReportDict::getPid, pid)
+                .eq(ActReportDict::getSource, source));
         return actReportDictList;
     }
 
     @Override
-    public Object getDictTree(List<ActReportDict> dataList) {
+    public Object getDictTree(List<ActReportDict> dataList, String source) {
         List<Map<String, Object>> list = new LinkedList<>();
         dataList.forEach(entity -> {
                     if (entity != null) {
-                        List<ActReportDict> permissionList = findByPid(entity.getId());
+                        List<ActReportDict> permissionList = findByPid(entity.getId(), source);
                         Map<String, Object> map = Maps.newHashMap();
                         map.put("id", entity.getId());
                         map.put("label", entity.getLabel());
                         if (permissionList != null && permissionList.size() != 0) {
-                            map.put("children", getDictTree(permissionList));
+                            map.put("children", getDictTree(permissionList, source));
                         }
                         list.add(map);
                     }
