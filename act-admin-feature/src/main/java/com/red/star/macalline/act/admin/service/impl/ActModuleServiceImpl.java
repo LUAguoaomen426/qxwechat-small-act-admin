@@ -519,6 +519,10 @@ public class ActModuleServiceImpl implements ActModuleService {
             actSpecLink.setTime(null);
             actSpecLink.setTimeLimit(null);
         }
+        if(0 == actSpecLink.getType()){
+            //当前广告位为外部链接，取消内部活动绑定
+            actSpecLink.setBindActCode(null);
+        }
         actSpecLink.setMallList(actSpecLink.getChangeMallList());
         if (actSpecLink.getMallList().size() > 0) {
             actSpecLinkMybatisMapper.updateSpecLinkMergerByList(actCode, actSpecLink.getSpecCode(), actSpecLink.getMallList());
