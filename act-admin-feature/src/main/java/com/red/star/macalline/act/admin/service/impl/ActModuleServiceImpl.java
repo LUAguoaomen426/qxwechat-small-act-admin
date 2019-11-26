@@ -519,7 +519,7 @@ public class ActModuleServiceImpl implements ActModuleService {
             actSpecLink.setTime(null);
             actSpecLink.setTimeLimit(null);
         }
-        if(0 == actSpecLink.getType()){
+        if (0 == actSpecLink.getType()) {
             //当前广告位为外部链接，取消内部活动绑定
             actSpecLink.setBindActCode(null);
         }
@@ -612,9 +612,9 @@ public class ActModuleServiceImpl implements ActModuleService {
                     for (ActGroupTicketV2 actTicket : tickets) {
                         Integer ticketId = actTicket.getSingleTicketId();
                         Integer extraNumber = addTicketNumberV2(actTicket, actExtraNumber);
-                        String shameNumber = (String) entries.get(ticketId);
+                        Integer shameNumber = (Integer) entries.get(String.valueOf(ticketId));
                         if (!ObjectUtils.isEmpty(shameNumber)) {
-                            extraNumber += Integer.valueOf(shameNumber);
+                            extraNumber += shameNumber;
                         }
                         res.put(ticketId.toString(), extraNumber);
                     }
@@ -622,7 +622,7 @@ public class ActModuleServiceImpl implements ActModuleService {
             }
         }
         redisTemplate.opsForHash().putAll(tsnKey, res);
-        redisTemplate.expire(tsnKey,62L,TimeUnit.DAYS);
+        redisTemplate.expire(tsnKey, 62L, TimeUnit.DAYS);
         sw.stop();
         LOGGER.info(sw.toString());
     }
