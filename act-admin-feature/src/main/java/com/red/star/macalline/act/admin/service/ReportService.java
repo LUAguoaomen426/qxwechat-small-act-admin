@@ -60,4 +60,14 @@ public interface ReportService {
      */
     @Cacheable(value = "imp:act:admin:report:dict", key = "'tree'+#source")
     Object getDictTree(List<ActReportDict> byPid, String source);
+
+    /**
+     * 汇总按钮点击报表
+     * @param criteria
+     * @param page
+     * @return
+     */
+    @Cacheable(value = "imp:act:admin:report:btn:summary")
+    Map<String, Object> queryAllForSummary(BtnDailyReportQueryCriteria criteria, Page page);
+
 }

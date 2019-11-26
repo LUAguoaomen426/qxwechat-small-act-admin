@@ -6,11 +6,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.red.star.macalline.act.admin.domain.ActReportBtnDaily;
-import com.red.star.macalline.act.admin.domain.SignUp;
 import com.red.star.macalline.act.admin.domain.ActReportDict;
+import com.red.star.macalline.act.admin.domain.SignUp;
 import com.red.star.macalline.act.admin.mapper.ActReportBtnDailyMybatisMapper;
-import com.red.star.macalline.act.admin.mapper.SignUpMapper;
 import com.red.star.macalline.act.admin.mapper.ActReportDictMybatisMapper;
+import com.red.star.macalline.act.admin.mapper.SignUpMapper;
 import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.ReportService;
 import com.red.star.macalline.act.admin.service.dto.BtnDailyReportDTO;
@@ -26,10 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
-import java.util.LinkedList;
-import java.util.List;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -118,7 +118,8 @@ public class ReportServiceImpl implements ReportService {
             wrapper.like("s.scene", criteria.getScene());
         }
 
-        wrapper.eq("s.source", source);
+        wrapper.eq("s.source", source)
+                .eq("d.pid", 170);
         Page<SignUp> listByPage = signUpMapper.findListByPage(page, wrapper);
 
         return PageMybatisUtil.toPage(listByPage);
@@ -149,6 +150,34 @@ public class ReportServiceImpl implements ReportService {
                 }
         );
         return list;
+    }
+
+    @Override
+    public Map<String, Object> queryAllForSummary(BtnDailyReportQueryCriteria criteria, Page page) {
+        QueryWrapper<ActReportBtnDaily> qryWrapper = new QueryWrapper<>();
+        qryWrapper
+                .eq("t.source", criteria.getSource())
+                .ne("tr.pid", 170)
+                .orderBy(true, false, "t.id");
+        if (!ObjectUtils.isEmpty(criteria.getDictIdStrSummary())) {
+            String[] split = criteria.getDictIdStrSummary().split(",");
+            List<String> list = Lists.newArrayList(split);
+            for (String s : split) {
+                List<ActReportDict> actReportDictList = findByPid(Integer.valueOf(s), criteria.getSource());
+                if (!ObjectUtils.isEmpty(actReportDictList)) {
+                    List<String> collect = actReportDictList.stream()
+                            .map(actReportDict -> String.valueOf(actReportDict.getId()))
+                            .collect(Collectors.toList());
+                    list.addAll(collect);
+                }
+            }
+            if (!ObjectUtils.isEmpty(list)) {
+                qryWrapper.and(qw -> qw.in("tr.id", list)
+                        .or().in("tr.pid", list));
+            }
+        }
+        Page<BtnDailyReportDTO> reportBtnDailyIPage = reportBtnDailyMybatisMapper.querySummaryListByPage(page, qryWrapper);
+        return PageMybatisUtil.toPage(reportBtnDailyIPage);
     }
 
 }

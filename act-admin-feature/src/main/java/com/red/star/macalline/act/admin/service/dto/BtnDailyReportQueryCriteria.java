@@ -14,6 +14,8 @@ public class BtnDailyReportQueryCriteria {
 
     private String dictIdStr;
 
+    private String dictIdStrSummary;
+
     // 数据日期
     private String dataDateStart;
 

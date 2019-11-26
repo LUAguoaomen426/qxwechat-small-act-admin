@@ -14,4 +14,27 @@
         </if>
     </select>
 
+    <select id="querySummaryListByPage" resultType="com.red.star.macalline.act.admin.service.dto.BtnDailyReportDTO">
+        SELECT
+        tr.id dictId,
+        tr.label dictLabel,
+        tr.ext_1,
+        t.*
+        FROM
+        tb_report_act_btn t
+        JOIN tb_report_act_dict tr ON t.module_name = tr.`value`
+        JOIN (
+        SELECT
+        max( tt.id ) AS id
+        FROM
+        ( SELECT * FROM tb_report_act_btn t ORDER BY t.id DESC ) tt
+        GROUP BY
+        tt.source,
+        tt.module_name
+        ) ttt ON ttt.id = t.id
+        <if test="ew.sqlSegment != null and ew.sqlSegment != ''">
+            ${ew.customSqlSegment}
+        </if>
+    </select>
+
 </mapper>
