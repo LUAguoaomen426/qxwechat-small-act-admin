@@ -24,4 +24,8 @@ public class BtnDailyReportQueryCriteria {
 
     // 活动标识
     private String source;
+
+    private String sortColumn = "t.id";
+
+    private Boolean isAsc = false;
 }

@@ -57,7 +57,7 @@ public class ReportServiceImpl implements ReportService {
         qryWrapper
                 .eq("t.source", criteria.getSource())
                 .ne("tr.pid", 170)
-                .orderBy(true, false, "t.id");
+                .orderBy(true, criteria.getIsAsc(), criteria.getSortColumn());
         if (!ObjectUtils.isEmpty(criteria.getDictIdStr())) {
             String[] split = criteria.getDictIdStr().split(",");
             List<String> list = Lists.newArrayList(split);
@@ -158,7 +158,7 @@ public class ReportServiceImpl implements ReportService {
         qryWrapper
                 .eq("t.source", criteria.getSource())
                 .ne("tr.pid", 170)
-                .orderBy(true, false, "t.id");
+                .orderBy(true, criteria.getIsAsc(), criteria.getSortColumn());
         if (!ObjectUtils.isEmpty(criteria.getDictIdStrSummary())) {
             String[] split = criteria.getDictIdStrSummary().split(",");
             List<String> list = Lists.newArrayList(split);
