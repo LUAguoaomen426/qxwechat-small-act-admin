@@ -284,18 +284,14 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
             return ActResponse.buildErrorResponse("参数有误");
         }
         mallMybatisMapper.updateActMallMerge(actCode, mallList);
-        //判断是否同时为广告位 如果是，则同步更新广告位内的商场
-       /* List<ActSpecLink> actSpecLinks = actSpecLinkMybatisMapper.selectList(new QueryWrapper<ActSpecLink>().eq("bind_act_code", actCode));
+        //判断是否同时为广告位 如果是，则删除广告位缓存
+        List<ActSpecLink> actSpecLinks = actSpecLinkMybatisMapper.selectList(new QueryWrapper<ActSpecLink>().eq("bind_act_code", actCode));
         if (!ObjectUtils.isEmpty(actSpecLinks)) {
-            for (ActSpecLink actSpecLink:actSpecLinks){
-                for (Mall mall : mallList) {
-                    MallSpecLink mallSpecLink=new MallSpecLink();
-                    mallSpecLink.setIsShow(mall.getIsJoin());
-                    mallSpecLinkMybatisMapper.update(mallSpecLink, new UpdateWrapper<MallSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
-                }
+            for (ActSpecLink actSpecLink : actSpecLinks) {
+                actModuleService.clearSpecLink(actCode, actSpecLink);
             }
 
-        }*/
+        }
         //清除一下缓存
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ACT + actCode);
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME + actCode);
@@ -375,6 +371,14 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
         mallMybatisMapper.updateActMergeIsJoinByActCode(actCode, false);
         mallMybatisMapper.updateActMallMerge(actCode, omsCodes);
 
+        //清空内部活动的缓存(活动是其他广告位的内部关联)
+        List<ActSpecLink> actSpecLinks = actSpecLinkMybatisMapper.selectList(new QueryWrapper<ActSpecLink>().eq("bind_act_code", actCode));
+        if (!ObjectUtils.isEmpty(actSpecLinks)) {
+            for (ActSpecLink actSpecLink : actSpecLinks) {
+                actModuleService.clearSpecLink(actCode, actSpecLink);
+            }
+
+        }
         //清除一下缓存
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_ACT + actCode);
         redisTemplate.delete(CacheConstant.CACHE_KEY_MALL_LIST_HOME + actCode);
