@@ -119,7 +119,8 @@ public class ReportServiceImpl implements ReportService {
         }
 
         wrapper.eq("s.source", source)
-                .eq("d.pid", 170);
+                .eq("d.pid", 170)
+                .orderBy(true,false,"s.id");
         Page<SignUp> listByPage = signUpMapper.findListByPage(page, wrapper);
 
         return PageMybatisUtil.toPage(listByPage);
