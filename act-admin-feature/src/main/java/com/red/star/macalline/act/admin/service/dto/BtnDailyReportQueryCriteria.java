@@ -28,4 +28,8 @@ public class BtnDailyReportQueryCriteria {
     private String sortColumn = "t.id";
 
     private Boolean isAsc = false;
+
+    private String sortColumnSummary = "t.id";
+
+    private Boolean isAscSummary = false;
 }

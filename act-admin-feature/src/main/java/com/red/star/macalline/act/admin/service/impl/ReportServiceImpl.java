@@ -158,7 +158,7 @@ public class ReportServiceImpl implements ReportService {
         qryWrapper
                 .eq("t.source", criteria.getSource())
                 .ne("tr.pid", 170)
-                .orderBy(true, criteria.getIsAsc(), criteria.getSortColumn());
+                .orderBy(true, criteria.getIsAscSummary(), criteria.getSortColumnSummary());
         if (!ObjectUtils.isEmpty(criteria.getDictIdStrSummary())) {
             String[] split = criteria.getDictIdStrSummary().split(",");
             List<String> list = Lists.newArrayList(split);
