@@ -674,11 +674,11 @@ public class ActModuleServiceImpl implements ActModuleService {
             SourcePvUvBo sourcePvUvBo1 = new SourcePvUvBo(sourcePvUvBo.getSource());
             SourcePvUvVo sourcePvUvVo1 = comMybatisMapper.analysisPVUV(sourcePvUvBo1);
             sourcePvUvVoList.add(sourcePvUvVo1);
-            sourcePvUvVoList.add(sourcePvUvVo);
             List<SourcePvUvVo> sourcePvUvVoData = comMybatisMapper.analysisPVUVData(sourcePvUvBo);
             //日期总计pvuv
             sourcePvUvVo = comMybatisMapper.analysisPVUVDataTotal(sourcePvUvBo);
             sourcePvUvVo.setDate("日期总计");
+            sourcePvUvVoList.add(sourcePvUvVo);
             sourcePvUvVoList.addAll(sourcePvUvVoData);
             stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(sourcePvUvVoList), CacheConstant.DAY, TimeUnit.SECONDS);
         } else {
