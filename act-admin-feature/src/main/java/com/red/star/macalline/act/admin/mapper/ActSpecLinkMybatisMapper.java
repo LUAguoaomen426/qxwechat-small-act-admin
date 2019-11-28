@@ -51,6 +51,5 @@ public interface ActSpecLinkMybatisMapper extends BaseMapper<ActSpecLink> {
      */
     void deleteSpecLinkMergerByList(@Param("actCode")String actCode,@Param("specCode")String specCode);
 
-
-
+    void update_NullField(@Param("link")ActSpecLink actSpecLink);
 }

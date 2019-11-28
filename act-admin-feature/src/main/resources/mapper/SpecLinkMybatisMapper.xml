@@ -72,4 +72,17 @@
          where act_code = #{actCode}
          and spec_code = #{specCode}
     </update>
+
+    <update id="update_NullField">
+        UPDATE tb_wap_act_spec_link t
+        SET t.`name` = #{link.name},
+        t.url = #{link.url},
+        t.show_image = #{link.showImage},
+        t.type = #{link.type},
+        t.time_limit = #{link.timeLimit},
+        t.bind_act_code = #{link.bindActCode},
+        t.update_time = NOW( )
+        WHERE
+            t.spec_code = #{link.specCode}
+    </update>
 </mapper>

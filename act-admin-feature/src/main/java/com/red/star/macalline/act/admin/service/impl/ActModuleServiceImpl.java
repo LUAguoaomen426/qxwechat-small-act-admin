@@ -68,7 +68,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2019-10-22
  */
 @Service
-@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+//@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ActModuleServiceImpl implements ActModuleService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActModuleService.class);
@@ -517,24 +517,25 @@ public class ActModuleServiceImpl implements ActModuleService {
 
         if (!"T".equals(actSpecLink.getHaveTL())) {
             actSpecLink.setTime(null);
+            actSpecLink.setTimeLimit(null);
+        }
+        if (0 == actSpecLink.getType()) {
+            //当前广告位为外部链接，取消内部活动绑定
+            actSpecLink.setBindActCode(null);
         }
         actSpecLink.setMallList(actSpecLink.getChangeMallList());
         if (actSpecLink.getMallList().size() > 0) {
             actSpecLinkMybatisMapper.updateSpecLinkMergerByList(actCode, actSpecLink.getSpecCode(), actSpecLink.getMallList());
         }
-        if (!ObjectUtils.isEmpty(actSpecLink.getBindActCode()) || (!ObjectUtils.isEmpty(actSpecLink.getTime())) || !oldInfo.getName().equals(actSpecLink.getName()) || !oldInfo.getUrl().equals(actSpecLink.getUrl()) || (!ObjectUtils.isEmpty(actSpecLink.getShowImage()) && !actSpecLink.getShowImage().equals(oldInfo.getShowImage()))) {
-            //修改了名称或者url，需要清除所有缓存
-            List<String> time = actSpecLink.getTime();
-            if (!ObjectUtils.isEmpty(time) && time.size() == 2) {
-                HashMap<Object, Object> map = Maps.newHashMap();
-                map.put("startTime", time.get(0));
-                map.put("endTime", time.get(1));
-                actSpecLink.setTimeLimit(JSON.toJSONString(map));
-            }
-            actSpecLinkMybatisMapper.update(actSpecLink, new UpdateWrapper<ActSpecLink>().eq("spec_code", actSpecLink.getSpecCode()));
-            clearSpecLink(actCode, actSpecLink);
-            return ActResponse.buildSuccessResponse("SUCCESS");
+        //修改了名称或者url，需要清除所有缓存
+        List<String> time = actSpecLink.getTime();
+        if (!ObjectUtils.isEmpty(time) && time.size() == 2) {
+            HashMap<Object, Object> map = Maps.newHashMap();
+            map.put("startTime", time.get(0));
+            map.put("endTime", time.get(1));
+            actSpecLink.setTimeLimit(JSON.toJSONString(map));
         }
+        actSpecLinkMybatisMapper.update_NullField(actSpecLink);
         clearSpecLink(actCode, actSpecLink);
         return ActResponse.buildSuccessResponse("SUCCESS");
     }
@@ -598,8 +599,9 @@ public class ActModuleServiceImpl implements ActModuleService {
         //先查表里所有的商场omsCode
         List<Mall> mallList = comService.listMallByAct(source);
         List<Integer> groupIdArray = groupIdArray(source);
-        HashMap<String, String> res = new HashMap<>();
+        HashMap<String, Object> res = new HashMap<>();
         String tsnKey = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.KEY_T_S_N;
+        Map entries = redisTemplate.opsForHash().entries(tsnKey);
         for (Mall mall : mallList) {
             //遍历该商场的所有团
             for (int i = 0; i < groupIdArray.size(); i++) {
@@ -610,17 +612,17 @@ public class ActModuleServiceImpl implements ActModuleService {
                     for (ActGroupTicketV2 actTicket : tickets) {
                         Integer ticketId = actTicket.getSingleTicketId();
                         Integer extraNumber = addTicketNumberV2(actTicket, actExtraNumber);
-                        String shameNumber = (String) redisTemplate.opsForHash().get(tsnKey, ticketId.toString());
+                        Integer shameNumber = (Integer) entries.get(String.valueOf(ticketId));
                         if (!ObjectUtils.isEmpty(shameNumber)) {
-                            extraNumber += Integer.valueOf(shameNumber);
+                            extraNumber += shameNumber;
                         }
-                        res.put(ticketId.toString(), extraNumber.toString());
+                        res.put(ticketId.toString(), extraNumber);
                     }
                 }
             }
         }
-        redisTemplate.opsForHash().put(tsnKey, res, RedisConstant.TOKEN_EXPIRY_JUNE);
-
+        redisTemplate.opsForHash().putAll(tsnKey, res);
+        redisTemplate.expire(tsnKey, 62L, TimeUnit.DAYS);
         sw.stop();
         LOGGER.info(sw.toString());
     }

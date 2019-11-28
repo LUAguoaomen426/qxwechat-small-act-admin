@@ -147,8 +147,8 @@ public class ActModuleController {
         return actResponse;
     }
 
-    @Log("增加广告位")
-    @ApiOperation(value = "增加广告位")
+    @Log("修改广告位")
+    @ApiOperation(value = "修改广告位")
     @PreAuthorize("hasAnyRole('ADMIN','ACT_ALL','ACT_SPEC_ALL','ACT_SPEC_UPDATE')")
     @PostMapping("/{actCode}/actSpecLink/save")
     public ActResponse saveSpecLink(@PathVariable("actCode") String actCode, @RequestBody ActSpecLink actSpecLink) {
