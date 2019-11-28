@@ -2,7 +2,6 @@ package com.red.star.macalline.act.admin.rest;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.red.star.macalline.act.admin.aop.log.Log;
-import com.red.star.macalline.act.admin.service.dto.SignUpQueryCriteria;
 import com.red.star.macalline.act.admin.domain.bo.FlopBo;
 import com.red.star.macalline.act.admin.domain.bo.LuckyBo;
 import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
@@ -11,6 +10,7 @@ import com.red.star.macalline.act.admin.service.ActModuleService;
 import com.red.star.macalline.act.admin.service.DrawService;
 import com.red.star.macalline.act.admin.service.ReportService;
 import com.red.star.macalline.act.admin.service.dto.BtnDailyReportQueryCriteria;
+import com.red.star.macalline.act.admin.service.dto.SignUpQueryCriteria;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,29 +122,35 @@ public class ReportController {
         return new ResponseEntity(reportService.queryAll(criteria, page), HttpStatus.OK);
     }
 
+    @Log("汇总按钮点击报表")
+    @ApiOperation(value = "查询汇总按钮点击报表")
+    @GetMapping(value = "/btnDailySummary")
+    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_BTN_DAILY_SUMMARY')")
+    public ResponseEntity btnDailySummary(BtnDailyReportQueryCriteria criteria, Page page) {
+        return new ResponseEntity(reportService.queryAllForSummary(criteria, page), HttpStatus.OK);
+    }
+
     @Log("留资Form表单参数")
     @ApiOperation(value = "留资表单部分参数获取")
     @GetMapping(value = "/signUpFormParam/{source}")
-    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_BTN_DAILY')")
-    public ResponseEntity getSignUpForm(@PathVariable String source){
-        return new ResponseEntity(reportService.getSignUpFormParam(source),HttpStatus.OK);
+    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_SIGN_UP')")
+    public ResponseEntity getSignUpForm(@PathVariable String source) {
+        return new ResponseEntity(reportService.getSignUpFormParam(source), HttpStatus.OK);
     }
 
     @Log("留资报表")
     @ApiOperation(value = "留资报表数据获取")
-    @GetMapping(value = "/signUpData")
-    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_BTN_DAILY')")
-    public ResponseEntity findSignUp(SignUpQueryCriteria criteria, Page page) throws ParseException {
-
-        return new ResponseEntity(reportService.querySignUpReportData(criteria,page),HttpStatus.OK);
-
+    @GetMapping(value = "/signUpData/{source}")
+    @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_SIGN_UP')")
+    public ResponseEntity findSignUp(SignUpQueryCriteria criteria, Page page, @PathVariable String source) throws ParseException {
+        return new ResponseEntity(reportService.querySignUpReportData(source, criteria, page), HttpStatus.OK);
     }
 
     @Log("报表的字典表")
     @ApiOperation(value = "报表的字典表")
-    @GetMapping(value = "/report/dict/tree")
+    @GetMapping(value = "/report/dict/tree/{source}")
     @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_DICT_TREE')")
-    public ResponseEntity getTree() {
-        return new ResponseEntity(reportService.getDictTree(reportService.findByPid(0)), HttpStatus.OK);
+    public ResponseEntity getTree(@PathVariable String source) {
+        return new ResponseEntity(reportService.getDictTree(reportService.findByPid(0, source), source), HttpStatus.OK);
     }
 }

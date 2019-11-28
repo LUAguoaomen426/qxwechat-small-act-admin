@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.red.star.macalline.act.admin.domain.ActReportDict;
 import com.red.star.macalline.act.admin.service.dto.BtnDailyReportQueryCriteria;
 import com.red.star.macalline.act.admin.service.dto.SignUpQueryCriteria;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.cache.annotation.Cacheable;
 
 import java.text.ParseException;
@@ -32,6 +31,7 @@ public interface ReportService {
      * 留资表单参数
      * @return
      */
+    @Cacheable(value = "imp:act:admin:report:signUp:form",key = "#source")
     Map<String,Object> getSignUpFormParam(String source);
 
     /**
@@ -40,22 +40,34 @@ public interface ReportService {
      * @param page
      * @return
      */
-    Map<String,Object> querySignUpReportData(SignUpQueryCriteria criteria, Page page) throws ParseException;
+    Map<String,Object> querySignUpReportData(String source,SignUpQueryCriteria criteria, Page page) throws ParseException;
     /**
      * findByPid
      *
      * @param pid
+     * @param source
      * @return
      */
-    @Cacheable(value = "imp:act:admin:report:dict", key = "'pid:'+#p0")
-    List<ActReportDict> findByPid(int pid);
+    @Cacheable(value = "imp:act:admin:report:dict", key = "'pid:'+#p0+'-source:'+#source")
+    List<ActReportDict> findByPid(int pid, String source);
 
     /**
      * 查询字典树
      *
      * @param byPid
+     * @param source
      * @return
      */
-    @Cacheable(value = "imp:act:admin:report:dict", key = "'tree'")
-    Object getDictTree(List<ActReportDict> byPid);
+    @Cacheable(value = "imp:act:admin:report:dict", key = "'tree'+#source")
+    Object getDictTree(List<ActReportDict> byPid, String source);
+
+    /**
+     * 汇总按钮点击报表
+     * @param criteria
+     * @param page
+     * @return
+     */
+    @Cacheable(value = "imp:act:admin:report:btn:summary")
+    Map<String, Object> queryAllForSummary(BtnDailyReportQueryCriteria criteria, Page page);
+
 }

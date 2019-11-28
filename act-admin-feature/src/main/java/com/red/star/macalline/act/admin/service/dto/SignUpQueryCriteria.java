@@ -27,5 +27,4 @@ public class SignUpQueryCriteria {
     private String endTime;
     private Integer cliType;
     private String scene;
-    private String source;
 }

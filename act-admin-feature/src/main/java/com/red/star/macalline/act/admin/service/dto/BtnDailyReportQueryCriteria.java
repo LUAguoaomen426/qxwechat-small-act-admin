@@ -14,6 +14,8 @@ public class BtnDailyReportQueryCriteria {
 
     private String dictIdStr;
 
+    private String dictIdStrSummary;
+
     // 数据日期
     private String dataDateStart;
 
@@ -22,4 +24,12 @@ public class BtnDailyReportQueryCriteria {
 
     // 活动标识
     private String source;
+
+    private String sortColumn = "t.id";
+
+    private Boolean isAsc = false;
+
+    private String sortColumnSummary = "t.id";
+
+    private Boolean isAscSummary = false;
 }
