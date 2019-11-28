@@ -676,10 +676,8 @@ public class ActModuleServiceImpl implements ActModuleService {
             sourcePvUvVoList.add(sourcePvUvVo1);
             sourcePvUvVoList.add(sourcePvUvVo);
             List<SourcePvUvVo> sourcePvUvVoData = comMybatisMapper.analysisPVUVData(sourcePvUvBo);
-            for (SourcePvUvVo entity : sourcePvUvVoData) {
-                sourcePvUvVo.setPv((ObjectUtils.isEmpty(entity.getPv()) ? 0 : entity.getPv()) + (ObjectUtils.isEmpty(sourcePvUvVo.getPv()) ? 0 : sourcePvUvVo.getPv()));
-                sourcePvUvVo.setUv((ObjectUtils.isEmpty(entity.getUv()) ? 0 : entity.getUv()) + (ObjectUtils.isEmpty(sourcePvUvVo.getUv()) ? 0 : sourcePvUvVo.getUv()));
-            }
+            //日期总计pvuv
+            sourcePvUvVo = comMybatisMapper.analysisPVUVDataTotal(sourcePvUvBo);
             sourcePvUvVo.setDate("日期总计");
             sourcePvUvVoList.addAll(sourcePvUvVoData);
             stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(sourcePvUvVoList), CacheConstant.DAY, TimeUnit.SECONDS);
