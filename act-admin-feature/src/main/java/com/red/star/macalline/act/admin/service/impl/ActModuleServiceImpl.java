@@ -12,7 +12,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.red.star.macalline.act.admin.constant.CacheConstant;
 import com.red.star.macalline.act.admin.constant.RabbitConstant;
-import com.red.star.macalline.act.admin.constant.RedisConstant;
 import com.red.star.macalline.act.admin.core.act.Act;
 import com.red.star.macalline.act.admin.core.act.ActFactory;
 import com.red.star.macalline.act.admin.domain.ActModule;
@@ -42,13 +41,13 @@ import com.red.star.macalline.act.admin.utils.QueryHelp;
 import com.red.star.macalline.act.admin.utils.ValidationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StopWatch;
@@ -676,7 +675,11 @@ public class ActModuleServiceImpl implements ActModuleService {
             sourcePvUvVoList.add(sourcePvUvVo1);
             List<SourcePvUvVo> sourcePvUvVoData = comMybatisMapper.analysisPVUVData(sourcePvUvBo);
             //日期总计pvuv
-            sourcePvUvVo = comMybatisMapper.analysisPVUVDataTotal(sourcePvUvBo);
+            if (!ObjectUtils.isEmpty(sourcePvUvBo.getStartTime())) {
+                sourcePvUvVo = comMybatisMapper.analysisPVUVDataTotal(sourcePvUvBo);
+            } else {
+                BeanUtils.copyProperties(sourcePvUvVo1, sourcePvUvVo);
+            }
             sourcePvUvVo.setDate("日期总计");
             sourcePvUvVoList.add(sourcePvUvVo);
             sourcePvUvVoList.addAll(sourcePvUvVoData);
