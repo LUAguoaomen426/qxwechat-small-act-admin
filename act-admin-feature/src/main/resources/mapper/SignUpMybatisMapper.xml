@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.red.star.macalline.act.admin.mapper.SignUpMapper">
+    <select id="findListByPage" resultType="com.red.star.macalline.act.admin.domain.SignUp">
+		SELECT
+			s.id,
+			s.NAME,
+			s.mobile,
+			s.oms_code,
+			s.create_time,
+			s.update_time,
+			s.source,
+			s.sub_channel,
+			s.page_url,
+			s.cli_type,
+			s.from_open_id,
+			s.from_union_id,
+			s.scene,
+			d.label type,
+			m.`mall_name`
+		FROM
+			tb_wap_sign_up s
+			LEFT JOIN tb_report_act_dict d ON s.type = d.value
+			LEFT JOIN tb_wap_mall m on s.oms_code = m.oms_code
+		  <where>
+			  ${ew.sqlSegment}
+		  </where>
+    </select>
+</mapper>
