@@ -467,12 +467,7 @@ public class ActModuleServiceImpl implements ActModuleService {
         Integer maxSort = actSpecLinkMybatisMapper.selectMaxSort("");
         maxSort = ObjectUtils.isEmpty(maxSort) ? 0 : maxSort;
         actSpecLink.setSort(maxSort + 1);
-        if (actSpecLink.getType().equals(0)) {
-            actSpecLink.setShowImage(removeImageWatermark(actSpecLink.getShowImage()));
-        } else {
-            //特殊链接不需要图片
-            actSpecLink.setShowImage(null);
-        }
+        actSpecLink.setShowImage(removeImageWatermark(actSpecLink.getShowImage()));
         if (!"T".equals(actSpecLink.getHaveTL())) {
             //不需要时间限制
             actSpecLink.setTime(null);
