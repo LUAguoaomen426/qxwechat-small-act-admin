@@ -243,7 +243,9 @@ public class DrawService {
             return ActResponse.buildErrorResponse("查询不到对应抽奖信息");
         }
         Date now = DateNewUtil.today();
-
+        if(now.compareTo(drawVo.getDrawEndTime()) >= 0){
+            return ActResponse.buildErrorResponse("当前抽奖已结束或到最后一天，不能再修改");
+        }
         String drawKey = CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_DRAW + drawVo.getId();
 
         Map map = parseDrawVO(drawVo);
