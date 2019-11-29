@@ -38,6 +38,14 @@ public interface ComMybatisMapper extends BaseMapper {
     List<LuckyVo> analysisLuckyData(@Param("luckyBo") LuckyBo luckyBo);
 
     /**
+     *
+     *大转盘抽奖记录
+     * @param luckyBo
+     * @return
+     */
+    List<LuckyVo> analysisLuckyWheelData(@Param("luckyBo") LuckyBo luckyBo);
+
+    /**
      * 根据团id和活动来源获取打卡次数
      *
      * @param groupId
