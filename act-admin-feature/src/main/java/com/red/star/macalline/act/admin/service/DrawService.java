@@ -457,6 +457,9 @@ public class DrawService {
         if (luckyBo.getSource().equals("november")) {
             return analysisLuckyDataNovember(luckyBo);
         }
+        if (luckyBo.getSource().equals("loveFamily")) {
+            return analysisLuckyDataLoveFamily(luckyBo);
+        }
 
         List<WapActDraw> select = wapActDrawMapper.selectList(new QueryWrapper<WapActDraw>().lambda().eq(WapActDraw::getActCode, luckyBo.getSource()));
         if (select.size() < 1) {
@@ -550,6 +553,30 @@ public class DrawService {
                 deviationVal = groupId == 1 ? 0 : (groupId - 2) * 2 + 4;
             }
             e.setGradeName(gradeMap.get(deviationVal + e.getGrade()));
+            if (null != luckyBo.getMallFlag()) {
+                if (mallFlag.equals(luckyBo.getMallFlag())) {
+                    luckyList.add(e);
+                }
+            } else {
+                luckyList.add(e);
+            }
+        });
+        return new LuckyData(luckyList, gradeMap);
+    }
+
+    private LuckyData analysisLuckyDataLoveFamily(LuckyBo luckyBo) {
+        List<LuckyVo> luckyList = Lists.newArrayList();
+        //十二月大促抽奖数据处理
+        List<String> gradeMap = Lists.newArrayList();
+        gradeMap.add("华为手机");
+        luckyBo.setGrade(1);
+
+        //得到查询结果
+        List<LuckyVo> luckyVoList = comMybatisMapper.analysisLuckyWheelData(luckyBo);
+        luckyVoList.forEach(e -> {
+            Boolean mallFlag = judgeMall(e.getOmsCode());
+            e.setMallFlag(mallFlag);
+            e.setGradeName("华为手机");
             if (null != luckyBo.getMallFlag()) {
                 if (mallFlag.equals(luckyBo.getMallFlag())) {
                     luckyList.add(e);
