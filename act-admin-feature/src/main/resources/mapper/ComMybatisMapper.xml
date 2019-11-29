@@ -18,19 +18,16 @@
     </select>
 
     <select id="findRecordByGroupIdAndSource" resultType="int">
-        SELECT
-        COUNT(1)
-        FROM
-        tb_wap_card_record
-        WHERE
-        group_id = #{groupId}
-        AND source = #{source}
+        SELECT COUNT(1)
+        FROM tb_wap_card_record
+        WHERE group_id = #{groupId}
+          AND source = #{source}
     </select>
 
     <select id="analysisPVUV" resultType="com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo">
         SELECT '总计'                      date,
-        count(1)                  pv,
-        count(DISTINCT t.open_id) uv
+               count(1)                  pv,
+               count(DISTINCT t.open_id) uv
         FROM tb_wap_record_view t
         WHERE t.source = #{sourcePvUvBo.source};
     </select>
@@ -86,6 +83,18 @@
         GROUP BY e.vip_id
         ORDER BY
         e.create_time DESC
+    </select>
+
+    <select id="analysisPVUVDataTotal" resultType="com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo">
+        SELECT
+        count(1) pv,
+        count(DISTINCT t.open_id) uv
+        FROM tb_wap_record_view t
+        WHERE t.source = #{sourcePvUvBo.source}
+        <if test="sourcePvUvBo.startTime!=null">AND t.create_time BETWEEN
+            #{sourcePvUvBo.startTime}
+            AND #{sourcePvUvBo.endTime}
+        </if>
     </select>
 
 

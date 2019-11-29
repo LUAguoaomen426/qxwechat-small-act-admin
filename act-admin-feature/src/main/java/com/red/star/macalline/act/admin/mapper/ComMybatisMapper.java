@@ -63,4 +63,11 @@ public interface ComMybatisMapper extends BaseMapper {
      */
     SourcePvUvVo analysisPVUV(@Param("sourcePvUvBo") SourcePvUvBo sourcePvUvBo1);
 
+    /**
+     * 日期内总pv、uv
+     *
+     * @param sourcePvUvBo
+     * @return
+     */
+    SourcePvUvVo analysisPVUVDataTotal(@Param("sourcePvUvBo") SourcePvUvBo sourcePvUvBo);
 }

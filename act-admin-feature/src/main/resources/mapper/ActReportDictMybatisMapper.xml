@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.red.star.macalline.act.admin.mapper.ActReportDictMybatisMapper">
+    
+    <select id="findSonByParentIdAndSource" resultType="com.red.star.macalline.act.admin.domain.ActReportDict">
+        SELECT
+            e.id,
+            e.create_time,
+            e.label,
+            e.`value`,
+            e.ext_1,
+            e.pid,
+            e.source
+        FROM
+            tb_report_act_dict e
+            LEFT JOIN tb_report_act_dict b ON e.pid = b.id
+        WHERE
+            b.`value` = #{value}
+            AND e.source = #{source}
+    </select>
+</mapper>
