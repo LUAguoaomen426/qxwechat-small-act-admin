@@ -15,7 +15,7 @@ pipeline {
           stage('确定') {
             steps {
                   input "Does the staging environment look ok?"
-            }  
+            }
         }
     }
 }
