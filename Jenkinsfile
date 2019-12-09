@@ -1,25 +1,20 @@
 pipeline {
   agent any
   stages {
-    stage('deploy dev') {
-      parallel {
-        stage('deploy dev') {
-          steps {
-            sh 'mvn clean package'
-            echo '开发环境已部署完成！'
-          }
-        }
-        stage('deploy test') {
-          steps {
-            echo 'zzzzz'
-          }
-        }
-      }
+    stage('build'){
+        sh 'mvn clean package install'    
     }
-    stage('确定') {
-      steps {
-        input 'Does the staging environment look ok?'
-      }
+    stage('push_dev') { 
+        timeout(time: 7, unit: 'DAYS') {
+            input message: '是否发布到dev环境？',ok: 'Yes'
+        }
+        //sh label: '', script: '/shell/deploy_v2.sh uat'
+    }
+    stage('push_uat') { 
+        timeout(time: 7, unit: 'DAYS') {
+            input message: '是否发布到uat环境？',ok: 'Yes'
+        }
+        //sh label: '', script: '/shell/deploy_v2.sh online1'
     }
   }
   tools {
