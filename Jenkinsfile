@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('build') {
             steps {
-                sh 'mvn --version'
+                echo '开始部署'
             }
         }
     }
