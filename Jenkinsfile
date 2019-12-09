@@ -2,9 +2,12 @@ pipeline {
     agent any
     stages {
         stage('build') {
-            steps {
-                echo '开始部署'
-            }
+    withMaven() {
+ 
+      // Run the maven build
+      sh "mvn clean verify"
+ 
+    }
         }
     }
 }
