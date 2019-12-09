@@ -12,7 +12,9 @@ pipeline {
                 echo "开发环境已部署完成！"
             }
           stage('确定') {
-        		input "Does the staging environment look ok?"
+              steps {
+                  input "Does the staging environment look ok?"
+              }
     		}
         }
     }
