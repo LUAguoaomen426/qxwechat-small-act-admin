@@ -1,7 +1,5 @@
 node {
-    stages {
-        stage('build') {
-              sh "mvn clean verify"
-        }
-    }
+     stage('build') {
+        sh "mvn clean verify"
+     }   
 }
