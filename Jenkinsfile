@@ -6,9 +6,10 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
+        stage('Deploy DEV') {
             steps {
                 sh "mvn clean package"
+                echo "开发环境已部署完成！"
             }
         }
     }
