@@ -10,7 +10,7 @@ spring:
     primary:
       type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://47.111.155.104:3306/macalline_test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+      url: jdbc:mysql://47.111.155.104:3306/macalline_uat?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
       username: macalline_db
       password: macalline_db@5621df08A9df9E0
       # 初始化配置
@@ -41,7 +41,7 @@ spring:
     read:
       type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://47.111.155.104:3306/macalline_test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+      url: jdbc:mysql://47.111.155.104:3306/macalline_uat?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
       username: macalline_db
       password: macalline_db@5621df08A9df9E0
       # 初始化配置
@@ -77,12 +77,12 @@ spring:
           username: macalline_db
           password: macalline_db@5621df08A9df9E0
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://47.111.155.104:3306/macalline_test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+          url: jdbc:mysql://47.111.155.104:3306/macalline_uat?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
         slave:
           username: macalline_db
           password: macalline_db@5621df08A9df9E0
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://47.111.155.104:3306/macalline_test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+          url: jdbc:mysql://47.111.155.104:3306/macalline_uat?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
 
   #配置 Jpa
   jpa:
@@ -102,7 +102,7 @@ spring:
         max-Idle: 16
         min-Idle: 0
     cluster:
-      nodes: 47.111.155.104:7001,47.111.155.104:7002,47.111.155.104:7003,47.111.155.104:7004,47.111.155.104:7005,47.111.155.104:7006
+      nodes: 47.110.60.167:7001,47.110.60.167:7002,47.110.60.167:7003,47.110.60.167:7004,47.110.60.167:7005,47.110.60.167:7006
     timeout: 2000
     password: ab42QAXCE@23
 
