@@ -115,6 +115,21 @@ public class Mall implements Serializable {
     @Column(name = "is_ml")
     private Boolean isMl;
 
+    /**
+     * 经度
+     */
+    @ApiModelProperty(value = "经度")
+    private Double longitude;
+
+    /*
+     * 纬度
+     */
+    @ApiModelProperty(value = "纬度")
+    private Double latitude;
+
+    @Transient
+    private Double distance;
+
     public void copy(Mall source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
     }
