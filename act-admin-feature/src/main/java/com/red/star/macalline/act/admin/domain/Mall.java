@@ -127,9 +127,6 @@ public class Mall implements Serializable {
     @ApiModelProperty(value = "纬度")
     private Double latitude;
 
-    @Transient
-    private Double distance;
-
     public void copy(Mall source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
     }
