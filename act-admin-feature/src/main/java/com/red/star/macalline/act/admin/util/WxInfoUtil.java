@@ -47,6 +47,7 @@ public class WxInfoUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        LOGGER.info("同步商场：" + fetch);
         return fetch;
     }
 
