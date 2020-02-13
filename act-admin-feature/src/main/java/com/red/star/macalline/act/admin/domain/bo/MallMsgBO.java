@@ -46,4 +46,9 @@ public class MallMsgBO {
     private String omsCode;
     @JsonProperty("STATUS")
     private String status;
+    /**
+     * 高德定位
+     */
+    @JsonProperty("GD_GPS")
+    private String gdGps;
 }

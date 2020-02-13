@@ -210,6 +210,15 @@ public class MallServiceImpl extends ServiceImpl<MallMybatisMapper, Mall> implem
             mall.setCity("市辖区".equals(mallBo.getCity()) ? mallBo.getProvince() : mallBo.getCity());
             mall.setSelfFlag("自营".equals(mallBo.getMallType()));
             mall.setDetailAddress(mallBo.getAddress());
+            //获取经纬度
+            String gdGps = mallBo.getGdGps();
+            if(!ObjectUtils.isEmpty(gdGps)){
+                String[] gps = gdGps.split(";");
+                Double longitude = Double.parseDouble(gps[0]);
+                Double latitude = Double.parseDouble(gps[1]);
+                mall.setLongitude(longitude);
+                mall.setLatitude(latitude);
+            }
             Mall oldMallInfo = allOmsCode.get(mallBo.getOmsCode());
             if (ObjectUtils.isEmpty(oldMallInfo)) {
                 //为新增
