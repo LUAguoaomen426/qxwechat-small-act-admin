@@ -119,12 +119,14 @@ public class Mall implements Serializable {
      * 经度
      */
     @ApiModelProperty(value = "经度")
+    @Column(name = "longitude")
     private Double longitude;
 
     /*
      * 纬度
      */
     @ApiModelProperty(value = "纬度")
+    @Column(name = "latitude")
     private Double latitude;
 
     public void copy(Mall source) {

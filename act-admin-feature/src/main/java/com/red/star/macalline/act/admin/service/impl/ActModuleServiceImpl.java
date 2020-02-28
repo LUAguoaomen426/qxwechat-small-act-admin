@@ -176,11 +176,9 @@ public class ActModuleServiceImpl implements ActModuleService {
         //刷新缓存
         redisTemplate.delete(CacheConstant.CACHE_KEY_PREFIX + actInfo.getActCode() + CacheConstant.CACHE_KEY_HOME_LINK);
         redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_LIST);
-        if (actInfo.getSubType().equals(1)) {
-            redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_MODULE + actInfo.getActCode());
-            redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_MODULE_POSTER_ID + actInfo.getPosterId());
-            redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_MODULE_POSTER_ID + oldActModule.getPosterId());
-        }
+        redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_MODULE + actInfo.getActCode());
+        redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_MODULE_POSTER_ID + actInfo.getPosterId());
+        redisTemplate.delete(CacheConstant.CACHE_KEY_ACT_MODULE_POSTER_ID + oldActModule.getPosterId());
 
         //发送MQ通知实例刷新缓存
         rabbitForwardService.sendMsgToFanoutExchange(RabbitConstant.FANOUT_ACT_REFRESH, actInfo.getActCode());
