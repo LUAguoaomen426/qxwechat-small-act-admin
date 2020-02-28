@@ -78,4 +78,7 @@ public class ActModuleDTO implements Serializable {
 
     // 渠道id
     private String channelId;
+
+    // 是否显示
+    private Boolean showFlag;
 }

@@ -114,6 +114,10 @@ public class ActModule implements Serializable {
     @Column(name = "channel_id")
     private String channelId;
 
+    // 是否显示
+    @Column(name = "show_flag")
+    private Boolean showFlag;
+
     public void copy(ActModule source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
     }
