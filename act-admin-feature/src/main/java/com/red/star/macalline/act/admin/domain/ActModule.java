@@ -36,7 +36,7 @@ public class ActModule implements Serializable {
 
     // 活动结束时间
     @Column(name = "end_time")
-    private Date endTime;
+    private Timestamp endTime;
 
     // 模块名称
     @Column(name = "module_name", nullable = false)
@@ -100,7 +100,7 @@ public class ActModule implements Serializable {
 
     // 活动结束时间
     @Column(name = "act_end_time")
-    private Date actEndTime;
+    private Timestamp actEndTime;
 
     // 电子海报id
     @Column(name = "poster_id")
