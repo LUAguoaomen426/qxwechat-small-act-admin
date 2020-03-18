@@ -96,15 +96,16 @@ spring:
     virtual-host: dev
     publisher-confirms: true
   redis:
-    jedis:
-      pool:
-        max-wait: 1000
-        max-Idle: 16
-        min-Idle: 0
     cluster:
       nodes: 47.111.155.104:7001,47.111.155.104:7002,47.111.155.104:7003,47.111.155.104:7004,47.111.155.104:7005,47.111.155.104:7006
-    timeout: 2000
     password: ab42QAXCE@23
+    lettuce:
+      pool:
+        max-idle: 16
+        min-idle: 0
+        max-wait: 1000
+        time-between-eviction-runs: 6000
+
 
 #jwt
 jwt:
