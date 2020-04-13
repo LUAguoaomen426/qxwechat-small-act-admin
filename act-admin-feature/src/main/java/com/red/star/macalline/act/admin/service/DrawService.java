@@ -467,24 +467,52 @@ public class DrawService {
             return new LuckyData();
         }
         List<String> gradeMap = Lists.newArrayList();
-        gradeMap.add("100元免单券");
-        gradeMap.add("200元免单券");
-        gradeMap.add("666元免单券");
-        gradeMap.add("9999元免单券");
+        gradeMap.add("欧派橱柜5100元大礼包");
+        gradeMap.add("欧派衣柜5100元大礼包");
+        gradeMap.add("欧铂尼木门5100元大礼包");
+        gradeMap.add("志邦家居5100元大礼包");
+        gradeMap.add("金牌厨柜5100元大礼包");
+        gradeMap.add("博洛尼5100元大礼包");
+        gradeMap.add("索菲亚5100元大礼包");
+        gradeMap.add("好莱客5100元大礼包");
+        gradeMap.add("我乐5100元大礼包");
+        gradeMap.add("皮阿诺5100元大礼包");
+        gradeMap.add("顶固全屋定制5100元大礼包");
         //修改查询
         if (!ObjectUtils.isEmpty(luckyBo.getGrade())) {
             switch (luckyBo.getGrade()) {
                 case 1:
-                    luckyBo.setGrade(100);
+                    luckyBo.setGrade(102);
                     break;
                 case 2:
-                    luckyBo.setGrade(200);
+                    luckyBo.setGrade(101);
                     break;
                 case 3:
-                    luckyBo.setGrade(666);
+                    luckyBo.setGrade(106);
                     break;
                 case 4:
-                    luckyBo.setGrade(9999);
+                    luckyBo.setGrade(103);
+                    break;
+                case 5:
+                    luckyBo.setGrade(108);
+                    break;
+                case 6:
+                    luckyBo.setGrade(105);
+                    break;
+                case 7:
+                    luckyBo.setGrade(100);
+                    break;
+                case 8:
+                    luckyBo.setGrade(104);
+                    break;
+                case 9:
+                    luckyBo.setGrade(109);
+                    break;
+                case 10:
+                    luckyBo.setGrade(107);
+                    break;
+                case 11:
+                    luckyBo.setGrade(110);
                     break;
             }
         }
@@ -494,6 +522,7 @@ public class DrawService {
         if (superBrandMaySource.equals(luckyBo.getSource())) {
             if (!luckyVoList.isEmpty() && luckyVoList.size() > 0) {
                 luckyVoList.forEach(luckyVo -> {
+                    luckyVo.setMallFlag(true);
                     JSONObject ticketInfo = JSONObject.parseObject(luckyVo.getTicketInfo());
                     luckyVo.setGradeName(ticketInfo.get("brandName") + "5100元大礼包");
                     luckyList.add(luckyVo);
