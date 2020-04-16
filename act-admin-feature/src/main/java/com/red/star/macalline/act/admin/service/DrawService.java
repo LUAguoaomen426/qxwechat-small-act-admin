@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.common.collect.Lists;
 import com.red.star.macalline.act.admin.constant.CacheConstant;
+import com.red.star.macalline.act.admin.core.act.Act;
 import com.red.star.macalline.act.admin.core.act.ActFactory;
 import com.red.star.macalline.act.admin.domain.WapActDraw;
 import com.red.star.macalline.act.admin.domain.bo.DrawElement;
@@ -243,7 +244,7 @@ public class DrawService {
             return ActResponse.buildErrorResponse("查询不到对应抽奖信息");
         }
         Date now = DateNewUtil.today();
-        if(now.compareTo(drawVo.getDrawEndTime()) >= 0){
+        if (now.compareTo(drawVo.getDrawEndTime()) >= 0) {
             return ActResponse.buildErrorResponse("当前抽奖已结束或到最后一天，不能再修改");
         }
         String drawKey = CacheConstant.CACHE_KEY_PREFIX + actCode + CacheConstant.CACHE_KEY_ACT_DRAW + drawVo.getId();
@@ -437,7 +438,7 @@ public class DrawService {
     }
 
     public Boolean octoberMall(String omsCode) {
-        if(ObjectUtils.isEmpty(octoberMallSet)) {
+        if (ObjectUtils.isEmpty(octoberMallSet)) {
             String canLotteryList = "1097,1330,1121,1098,1099,1088,1087,3014,1025,1187,1294,1126,1275,1217,1022,1164,1011,1283,1037,1255,1245,1128,1040,4897,1202,1201,1205,1207,1246,1101,1206,1227,1115,1062,1209,1061,1138,1244,1271,1063,1052,1230,1220,1215,1119,1213,1005,1169,1001,1113,1009,1043,1322,3091,1048,1287,1010,1015,1084,1071,1072,1075,1074,1073,1190,1272,1067,1065,1066";
             List<String> mallList = Lists.newArrayList(canLotteryList.split(","));
             octoberMallSet.addAll(mallList);
@@ -466,42 +467,82 @@ public class DrawService {
             return new LuckyData();
         }
         List<String> gradeMap = Lists.newArrayList();
-        gradeMap.add("100元免单券");
-        gradeMap.add("200元免单券");
-        gradeMap.add("666元免单券");
-        gradeMap.add("9999元免单券");
+        gradeMap.add("欧派橱柜5100元大礼包");
+        gradeMap.add("欧派衣柜5100元大礼包");
+        gradeMap.add("欧铂尼木门5100元大礼包");
+        gradeMap.add("志邦家居5100元大礼包");
+        gradeMap.add("金牌厨柜5100元大礼包");
+        gradeMap.add("博洛尼5100元大礼包");
+        gradeMap.add("索菲亚5100元大礼包");
+        gradeMap.add("好莱客5100元大礼包");
+        gradeMap.add("我乐5100元大礼包");
+        gradeMap.add("皮阿诺5100元大礼包");
+        gradeMap.add("顶固全屋定制5100元大礼包");
         //修改查询
         if (!ObjectUtils.isEmpty(luckyBo.getGrade())) {
             switch (luckyBo.getGrade()) {
                 case 1:
-                    luckyBo.setGrade(100);
+                    luckyBo.setGrade(102);
                     break;
                 case 2:
-                    luckyBo.setGrade(200);
+                    luckyBo.setGrade(101);
                     break;
                 case 3:
-                    luckyBo.setGrade(666);
+                    luckyBo.setGrade(106);
                     break;
                 case 4:
-                    luckyBo.setGrade(9999);
+                    luckyBo.setGrade(103);
+                    break;
+                case 5:
+                    luckyBo.setGrade(108);
+                    break;
+                case 6:
+                    luckyBo.setGrade(105);
+                    break;
+                case 7:
+                    luckyBo.setGrade(100);
+                    break;
+                case 8:
+                    luckyBo.setGrade(104);
+                    break;
+                case 9:
+                    luckyBo.setGrade(109);
+                    break;
+                case 10:
+                    luckyBo.setGrade(107);
+                    break;
+                case 11:
+                    luckyBo.setGrade(110);
                     break;
             }
         }
         List<LuckyVo> luckyList = Lists.newArrayList();
         List<LuckyVo> luckyVoList = comMybatisMapper.analysisLuckyData(luckyBo);
-        luckyVoList.forEach(e -> {
-            Boolean mallFlag = octoberMall(e.getOmsCode());
-            e.setMallFlag(mallFlag);
-            JSONObject ticketInfo = JSONObject.parseObject(e.getTicketInfo());
-            e.setGradeName(e.getGrade() + "元免单券 "+"("+ ((Integer) ticketInfo.get("omsType") == 1 ?"龙翼券":"喵零券")+")");
-            if (null != luckyBo.getMallFlag()) {
-                if (mallFlag.equals(luckyBo.getMallFlag())) {
+        String superBrandMaySource = "202005-category";
+        if (superBrandMaySource.equals(luckyBo.getSource())) {
+            if (!luckyVoList.isEmpty() && luckyVoList.size() > 0) {
+                luckyVoList.forEach(luckyVo -> {
+                    luckyVo.setMallFlag(true);
+                    JSONObject ticketInfo = JSONObject.parseObject(luckyVo.getTicketInfo());
+                    luckyVo.setGradeName(ticketInfo.get("brandName") + "5100元大礼包");
+                    luckyList.add(luckyVo);
+                });
+            }
+        } else {
+            luckyVoList.forEach(e -> {
+                Boolean mallFlag = octoberMall(e.getOmsCode());
+                e.setMallFlag(mallFlag);
+                JSONObject ticketInfo = JSONObject.parseObject(e.getTicketInfo());
+                e.setGradeName(e.getGrade() + "元免单券 " + "(" + ((Integer) ticketInfo.get("omsType") == 1 ? "龙翼券" : "喵零券") + ")");
+                if (null != luckyBo.getMallFlag()) {
+                    if (mallFlag.equals(luckyBo.getMallFlag())) {
+                        luckyList.add(e);
+                    }
+                } else {
                     luckyList.add(e);
                 }
-            } else {
-                luckyList.add(e);
-            }
-        });
+            });
+        }
         return new LuckyData(luckyList, gradeMap);
     }
 
