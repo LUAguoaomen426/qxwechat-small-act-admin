@@ -6,22 +6,23 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.red.star.macalline.act.admin.constant.CacheConstant;
 import com.red.star.macalline.act.admin.constant.RabbitConstant;
+import com.red.star.macalline.act.admin.constant.ResponseConstant;
 import com.red.star.macalline.act.admin.core.act.Act;
 import com.red.star.macalline.act.admin.core.act.ActFactory;
+import com.red.star.macalline.act.admin.core.exception.CustomException;
 import com.red.star.macalline.act.admin.domain.ActModule;
+import com.red.star.macalline.act.admin.domain.ActReportDict;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
 import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
-import com.red.star.macalline.act.admin.domain.vo.ActExtraNumber;
-import com.red.star.macalline.act.admin.domain.vo.ActGroupTicketV2;
-import com.red.star.macalline.act.admin.domain.vo.ActResponse;
-import com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo;
+import com.red.star.macalline.act.admin.domain.vo.*;
 import com.red.star.macalline.act.admin.exception.EntityExistException;
 import com.red.star.macalline.act.admin.mapper.ActModuleMybatisMapper;
 import com.red.star.macalline.act.admin.mapper.ActSpecLinkMybatisMapper;
@@ -54,6 +55,7 @@ import org.springframework.util.StopWatch;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -61,6 +63,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author AMGuo
@@ -788,5 +791,59 @@ public class ActModuleServiceImpl implements ActModuleService {
         return extraNumber;
     }
 
+    @Override
+    public void addTopList(String source, @Valid TopListVo topListVo) {
+        String topListHitNumKey = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.CACHE_KEY_HIT_NUM_KEY + topListVo.getGoodsNo();
+        if (!redisTemplate.hasKey(topListHitNumKey)) {
+            redisTemplate.opsForValue().set(topListHitNumKey, 0);
+        }
+        Integer extraNumber = Integer.parseInt(stringRedisTemplate.opsForValue().get(topListHitNumKey));
+        stringRedisTemplate.opsForValue().set(topListHitNumKey, String.valueOf(extraNumber + topListVo.getBillboardNum()));
+    }
+
+    @Override
+    public List<GoodsVo> findGoodsByBillboard(String source, String billboardNo) {
+        List<GoodsVo> goods = new ArrayList<>();
+        String configDataBySource = actModuleMybatisMapper.findConfigDataBySource(source);
+        if (!configDataBySource.isEmpty()) {
+            Map<String, Object> configData = JSONObject.parseObject(configDataBySource, Map.class);
+            Object goodsJson = getConfig(configData, "topList.goods");
+            List<GoodsVo> goodsVos = JSONObject.parseArray(goodsJson.toString(), GoodsVo.class);
+            goodsVos.stream().forEach(goodsVo -> {
+                if (billboardNo.equals(goodsVo.getBillboardNo())) {
+                    goods.add(goodsVo);
+                }
+            });
+        }
+        return goods;
+    }
+
+    public Object getConfig(Map<String, Object> configData, String configKey) {
+        if (configData.isEmpty()) {
+            return null;
+        }
+        if (configKey.isEmpty()) {
+            return null;
+        }
+        String[] keySplit = configKey.split("\\.");
+        LinkedList<String> keyList = Arrays.stream(keySplit)
+                .collect(Collectors.toCollection(LinkedList::new));
+        Object value = null;
+        try {
+            value = getValue(configData, keyList);
+        } catch (Exception e) {
+            LOGGER.error("错误", e);
+        }
+        return value;
+    }
+
+    private Object getValue(Object configData, LinkedList<String> keyList) {
+        String t = keyList.poll();
+        configData = JSON.parseObject(JSON.toJSONString(configData)).get(t);
+        if (ObjectUtils.isEmpty(keyList)) {
+            return configData;
+        }
+        return getValue(configData, keyList);
+    }
 
 }
