@@ -818,6 +818,16 @@ public class ActModuleServiceImpl implements ActModuleService {
         return goods;
     }
 
+    @Override
+    public Integer findBillboardNum(String source, String goodsNo) {
+        String topListHitNumKey = CacheConstant.CACHE_KEY_PREFIX + source + CacheConstant.CACHE_KEY_HIT_NUM_KEY + goodsNo;
+        if (!redisTemplate.hasKey(topListHitNumKey)) {
+            return 0;
+        }
+        Integer extraNumber = Integer.parseInt(stringRedisTemplate.opsForValue().get(topListHitNumKey));
+        return extraNumber;
+    }
+
     public Object getConfig(Map<String, Object> configData, String configKey) {
         if (configData.isEmpty()) {
             return null;

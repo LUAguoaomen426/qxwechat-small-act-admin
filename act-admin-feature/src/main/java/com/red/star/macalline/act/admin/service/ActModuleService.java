@@ -150,5 +150,5 @@ public interface ActModuleService {
 
     List<GoodsVo> findGoodsByBillboard(String source, String billboardNo);
 
-
+    Integer findBillboardNum(String source, String goodsNo);
 }

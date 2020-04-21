@@ -171,4 +171,12 @@ public class ReportController {
         List<GoodsVo> goods = actModuleService.findGoodsByBillboard(source, billboardNo);
         return ActResponse.buildSuccessResponse(goods);
     }
+
+    @Log("根据商品获取榜单值")
+    @ApiOperation(value = "根据商品获取榜单值")
+    @GetMapping("/findBillboardNum")
+    public ActResponse findBillboardNum(String source, String goodsNo) throws IOException {
+        Integer billboardNum = actModuleService.findBillboardNum(source, goodsNo);
+        return ActResponse.buildSuccessResponse(billboardNum);
+    }
 }
