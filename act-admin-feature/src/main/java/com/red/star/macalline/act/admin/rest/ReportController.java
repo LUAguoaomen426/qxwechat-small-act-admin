@@ -12,6 +12,8 @@ import com.red.star.macalline.act.admin.service.ReportService;
 import com.red.star.macalline.act.admin.service.dto.BtnDailyReportQueryCriteria;
 import com.red.star.macalline.act.admin.service.dto.SignUpQueryCriteria;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -152,5 +154,29 @@ public class ReportController {
     @PreAuthorize("hasAnyRole('ADMIN','DRAW_ALL','REPORT_ACT_DICT_TREE')")
     public ResponseEntity getTree(@PathVariable String source) {
         return new ResponseEntity(reportService.getDictTree(reportService.findByPid(0, source), source), HttpStatus.OK);
+    }
+
+    @Log("添加榜单值")
+    @ApiOperation(value = "添加榜单值")
+    @PostMapping("/addTopList")
+    public ActResponse addTopList(String source, @RequestBody @Valid TopListVo topListVo) throws IOException {
+        actModuleService.addTopList(source, topListVo);
+        return ActResponse.buildSuccessResponse();
+    }
+
+    @Log("根据榜单获取商品")
+    @ApiOperation(value = "根据榜单获取商品")
+    @GetMapping("/findGoodsByBillboard")
+    public ActResponse<GoodsVo> findGoodsByBillboard(String source, String billboardNo) throws IOException {
+        List<GoodsVo> goods = actModuleService.findGoodsByBillboard(source, billboardNo);
+        return ActResponse.buildSuccessResponse(goods);
+    }
+
+    @Log("根据商品获取榜单值")
+    @ApiOperation(value = "根据商品获取榜单值")
+    @GetMapping("/findBillboardNum")
+    public ActResponse findBillboardNum(String source, String goodsNo) throws IOException {
+        Integer billboardNum = actModuleService.findBillboardNum(source, goodsNo);
+        return ActResponse.buildSuccessResponse(billboardNum);
     }
 }

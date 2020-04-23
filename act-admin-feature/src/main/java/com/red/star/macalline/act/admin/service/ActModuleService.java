@@ -4,9 +4,7 @@ import com.red.star.macalline.act.admin.domain.ActModule;
 import com.red.star.macalline.act.admin.domain.ActSpecLink;
 import com.red.star.macalline.act.admin.domain.Mall;
 import com.red.star.macalline.act.admin.domain.bo.SourcePvUvBo;
-import com.red.star.macalline.act.admin.domain.vo.ActExtraNumber;
-import com.red.star.macalline.act.admin.domain.vo.ActResponse;
-import com.red.star.macalline.act.admin.domain.vo.SourcePvUvVo;
+import com.red.star.macalline.act.admin.domain.vo.*;
 import com.red.star.macalline.act.admin.service.dto.ActModuleDTO;
 import com.red.star.macalline.act.admin.service.dto.ActModuleQueryCriteria;
 import org.springframework.data.domain.Pageable;
@@ -147,4 +145,10 @@ public interface ActModuleService {
     List<SourcePvUvVo> analysisPVUVData(@Valid SourcePvUvBo sourcePvUvBo);
 
     void clearSpecLink(String actCode, ActSpecLink actSpecLink);
+
+    void addTopList(String source, @Valid TopListVo topListVo);
+
+    List<GoodsVo> findGoodsByBillboard(String source, String billboardNo);
+
+    Integer findBillboardNum(String source, String goodsNo);
 }

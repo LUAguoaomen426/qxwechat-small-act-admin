@@ -382,4 +382,9 @@ public class CacheConstant {
      * PVUV
      */
     public static final String CACHE_KEY_PVUV = "PVUV";
+
+    /**
+     * 打榜值
+     */
+    public static final String CACHE_KEY_HIT_NUM_KEY = ":topList:hitNum:";
 }
